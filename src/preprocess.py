@@ -15,9 +15,8 @@ NUMERIC = [
 
 
 def load_raw(path) -> pd.DataFrame:
-    df = pd.read_csv(path, sep=";", na_values=["?"], low_memory=False)
-    df["datetime"] = pd.to_datetime(df["Date"] + " " + df["Time"], format="%d/%m/%Y %H:%M:%S")
-    df = df.drop(columns=["Date", "Time"]).set_index("datetime").sort_index()
+    df = pd.read_csv(path, parse_dates=["Datetime"], index_col="Datetime").sort_index()
+    df.index.name = "datetime"
     df[NUMERIC] = df[NUMERIC].astype("float32")
     return df
 
@@ -43,7 +42,7 @@ def clean_and_resample(df: pd.DataFrame, rule: str, max_gap: int) -> pd.DataFram
 
 def main() -> None:
     params = load_params()
-    raw = load_raw(resolve(params["data"]["raw_txt"]))
+    raw = load_raw(resolve(params["data"]["raw_csv"]))
     missing_pct = float(raw["Global_active_power"].isna().mean() * 100)
     log.info("Loaded %d minute rows, %.2f%% missing", len(raw), missing_pct)
     hourly = clean_and_resample(raw, params["data"]["resample_rule"], params["data"]["max_interp_gap_hours"])

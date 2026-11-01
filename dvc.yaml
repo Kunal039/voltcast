@@ -4,10 +4,10 @@ stages:
     cmd: python -m src.data_ingestion
     deps: [src/data_ingestion.py]
     params: [configs/params.yaml:data]
-    outs: [data/raw/household_power_consumption.txt]
+    outs: [data/household_power_consumption.csv]
   preprocess:
     cmd: python -m src.preprocess
-    deps: [src/preprocess.py, data/raw/household_power_consumption.txt]
+    deps: [src/preprocess.py, data/household_power_consumption.csv]
     outs: [data/processed/hourly.parquet]
     metrics: [reports/data_stats.json: {cache: false}]
   features:

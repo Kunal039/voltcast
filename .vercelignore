@@ -1,5 +1,5 @@
 # Keep the serverless bundle small: only the API code, model, config and web assets are needed.
-data/raw/
+data/household_power_consumption.csv
 data/processed/
 mlruns/
 mlflow.db

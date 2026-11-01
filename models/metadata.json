@@ -1,7 +1,7 @@
 {
   "model_name": "hist_gradient_boosting",
-  "trained_at": "2026-11-01T16:09:16+00:00",
-  "mlflow_run_id": "f61638b577a8461a8259c50b099c6391",
+  "trained_at": "2026-11-01T17:21:40+00:00",
+  "mlflow_run_id": "b7a5f2bb55a44a3e939df1fd20923d92",
   "features": [
     "hour",
     "dayofweek",

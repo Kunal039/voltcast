@@ -2,7 +2,7 @@ __pycache__/
 .pytest_cache/
 *.pyc
 .vercel/
-data/raw/
+data/household_power_consumption.csv
 data/processed/
 mlruns/
 mlflow.db

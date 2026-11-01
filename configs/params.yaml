@@ -1,8 +1,7 @@
 # Central configuration for the VoltCast (Household Electricity Consumption Prediction) pipeline.
 data:
   url: "https://archive.ics.uci.edu/static/public/235/individual+household+electric+power+consumption.zip"
-  raw_zip: data/raw/household_power.zip
-  raw_txt: data/raw/household_power_consumption.txt
+  raw_csv: data/household_power_consumption.csv
   processed: data/processed/hourly.parquet
   features: data/processed/features.parquet
   serving: data/serving/recent_hourly.csv
