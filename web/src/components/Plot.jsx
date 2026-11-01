@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
-import Plotly from "plotly.js-dist-min";
+// Cartesian build covers every trace type used here (scatter, bar, heatmap, pie) at about a quarter of the size.
+import Plotly from "plotly.js-cartesian-dist-min";
 
 export const COLORS = { blue: "#1f5fa8", orange: "#e07b24", grey: "#9aa3af", green: "#2f8f5b" };
 
