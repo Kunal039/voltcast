@@ -11,3 +11,5 @@ report/~$*
 
 .vercel
 .env*
+/public/
+web/node_modules/

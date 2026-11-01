@@ -6,7 +6,7 @@ data:
   processed: data/processed/hourly.parquet
   features: data/processed/features.parquet
   serving: data/serving/recent_hourly.csv
-  web_data: public/data/dashboard.json
+  web_data: web/public/data/dashboard.json
   resample_rule: "1h"
   max_interp_gap_hours: 6
 

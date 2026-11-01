@@ -568,7 +568,7 @@ table(["Module", "Responsibility"], [
     ["src/evaluate.py", "EDA and diagnostic figures, permutation importance"],
     ["src/predict.py", "Recursive multi-step forecasting with intervals"],
     ["serving/main.py, app.py", "FastAPI service: /predict, /forecast, /health, /model-info, /metrics"],
-    ["public/index.html, src/export_web.py", "Web dashboard hosted on Vercel and its data export"],
+    ["web/ (React + Vite), src/export_web.py", "React web dashboard hosted on Vercel and its data export"],
     ["dashboard/app.py", "Streamlit dashboard (5 tabs)"],
     ["tests/test_pipeline.py", "Unit, leakage, API and quality-gate tests"],
     [".github/workflows/ci.yml, Dockerfile, dvc.yaml", "Automation, packaging, reproducibility"],
@@ -628,7 +628,7 @@ para(f"The most important inputs are {top}. The previous hour's current intensit
      "encodings capture daily routines, which is physically consistent.")
 
 para("**Deployment validation.** The FastAPI service and web dashboard are deployed on Vercel at https://household-power-forecast.vercel.app, "
-     "auto-deployed from the GitHub repository. The service was also run locally. A forecast request "
+     "as a React single-page app backed by the FastAPI function, auto-deployed from the GitHub repository. The service was also run locally. A forecast request "
      "with one week of history returned a 24-hour forecast with intervals in well under one second. "
      "Interactive OpenAPI documentation is served at /docs (see User Manual).")
 para("**Automated testing.** The pytest suite (Table 4.3) passes in about 3 seconds and runs in CI on every push.")

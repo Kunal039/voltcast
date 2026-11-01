@@ -21,3 +21,4 @@ src/monitor.py
 src/preprocess.py
 src/data_ingestion.py
 src/export_web.py
+web/node_modules/

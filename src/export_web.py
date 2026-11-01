@@ -1,4 +1,4 @@
-"""Stage 7 - Export: lightweight artifacts for the hosted web app.
+"""Stage 7 - Export: lightweight artifacts for the hosted web app (React site in web/).
 
 Writes the recent hourly history the API needs (CSV, so serving does not need
 pyarrow) and a JSON bundle of precomputed charts for the static dashboard page.
@@ -47,7 +47,7 @@ def main() -> None:
     }
     out = resolve(params["data"]["web_data"])
     out.write_text(json.dumps(bundle))
-    img = ROOT / "public" / "img"
+    img = ROOT / "web" / "public" / "img"
     img.mkdir(parents=True, exist_ok=True)
     shutil.copy(ROOT / "reports" / "figures" / "fig_architecture.png", img / "architecture.png")
     log.info("Wrote %d serving rows and dashboard bundle (%.0f KB)", len(recent), out.stat().st_size / 1024)

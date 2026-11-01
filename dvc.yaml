@@ -32,4 +32,4 @@ stages:
   export_web:
     cmd: python -m src.export_web
     deps: [src/export_web.py, models/model.joblib, reports/monitoring.json]
-    outs: [data/serving/recent_hourly.csv: {cache: false}, public/data/dashboard.json: {cache: false}]
+    outs: [data/serving/recent_hourly.csv: {cache: false}, web/public/data/dashboard.json: {cache: false}]
