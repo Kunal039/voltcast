@@ -44,6 +44,11 @@ export default function Forecast({ range }) {
           line: { color: COLORS.blue, width: 1.6 } },
         { x: xs, y: f.map((p) => p.actual_kw), name: "Actual", line: { color: "#6b7280", dash: "dot", width: 1.6 } },
         { x: xs, y: f.map((p) => p.predicted_kw), name: "Forecast", line: { color: COLORS.orange, width: 3 } },
+        { x: f.filter((p) => p.peak_alert).map((p) => p.timestamp), y: f.filter((p) => p.peak_alert).map((p) => p.predicted_kw),
+          name: "Peak-hour alert", mode: "markers", marker: { color: "#b42318", size: 9, symbol: "triangle-up" },
+          customdata: f.filter((p) => p.peak_alert).map((p) => (p.alert_method === "classifier"
+            ? `classifier: ${(p.peak_probability * 100).toFixed(0)}% peak probability` : "forecast above peak threshold")),
+          hovertemplate: "Peak-hour alert<br>%{customdata}<extra></extra>" },
       ],
       layout: {
         margin: { t: 20, r: 12, b: 64, l: 50 },
@@ -66,6 +71,7 @@ export default function Forecast({ range }) {
       [`${result.predicted_energy_kwh.toFixed(2)} kWh`, "predicted energy"],
       [`${when} · ${peak.predicted_kw.toFixed(2)} kW`, "predicted peak"],
       [paired.length ? `${mae.toFixed(3)} kW` : "–", "MAE vs actual"],
+      [`${f.filter((p) => p.peak_alert).length} of ${f.length} hours`, "peak-hour alerts"],
     ];
   }, [result]);
 

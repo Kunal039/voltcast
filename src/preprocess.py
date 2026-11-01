@@ -40,6 +40,23 @@ def clean_and_resample(df: pd.DataFrame, rule: str, max_gap: int) -> pd.DataFram
     return hourly
 
 
+def outlier_report(hourly: pd.DataFrame) -> dict:
+    """IQR rule (outside Q1 - 1.5 IQR .. Q3 + 1.5 IQR) per variable.
+
+    Outliers are reported, not removed: high readings are real peak usage (heaters,
+    ovens), exactly the hours the forecaster must learn. Distance-based models
+    (KNN, SVM) instead get standardised inputs so large-valued columns do not dominate.
+    """
+    out = {}
+    for c in ["Global_active_power", "Global_reactive_power", "Voltage", "Global_intensity"]:
+        q1, q3 = hourly[c].quantile([0.25, 0.75])
+        lo, hi = q1 - 1.5 * (q3 - q1), q3 + 1.5 * (q3 - q1)
+        n = int(((hourly[c] < lo) | (hourly[c] > hi)).sum())
+        out[c] = {"lower": round(float(lo), 3), "upper": round(float(hi), 3), "count": n,
+                  "pct": round(n / len(hourly) * 100, 2)}
+    return out
+
+
 def main() -> None:
     params = load_params()
     raw = load_raw(resolve(params["data"]["raw_csv"]))
@@ -54,6 +71,7 @@ def main() -> None:
         "hourly_rows": int(len(hourly)),
         "start": str(hourly.index.min()),
         "end": str(hourly.index.max()),
+        "outliers": outlier_report(hourly),
     }
     (ROOT / "reports").mkdir(exist_ok=True)
     (ROOT / "reports" / "data_stats.json").write_text(json.dumps(stats, indent=2))

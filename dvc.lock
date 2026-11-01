@@ -1,0 +1,322 @@
+schema: '2.0'
+stages:
+  ingest:
+    cmd: python -m src.data_ingestion
+    deps:
+    - path: src/data_ingestion.py
+      hash: md5
+      md5: 5459ab68edcd4bdc68a2fc5a3d35b0a2
+      size: 2351
+    params:
+      configs/params.yaml:
+        data.url: 
+          https://archive.ics.uci.edu/static/public/235/individual+household+electric+power+consumption.zip
+    outs:
+    - path: data/household_power_consumption.csv
+      hash: md5
+      md5: 75063891c3bb19ecbc5855578a81ee0b
+      size: 114578875
+  preprocess:
+    cmd: python -m src.preprocess
+    deps:
+    - path: data/household_power_consumption.csv
+      hash: md5
+      md5: 75063891c3bb19ecbc5855578a81ee0b
+      size: 114578875
+    - path: src/preprocess.py
+      hash: md5
+      md5: b43484c6cc0de9ef2d2c942c57d79899
+      size: 3489
+    params:
+      configs/params.yaml:
+        data.max_interp_gap_hours: 6
+        data.resample_rule: 1h
+    outs:
+    - path: data/processed/hourly.parquet
+      hash: md5
+      md5: d522aedc5048a7ef7dabad72e048d0d1
+      size: 1075765
+    - path: reports/data_stats.json
+      hash: md5
+      md5: a166ef11d569f2456b54db9277dc9e1d
+      size: 660
+  features:
+    cmd: python -m src.features
+    deps:
+    - path: data/processed/hourly.parquet
+      hash: md5
+      md5: d522aedc5048a7ef7dabad72e048d0d1
+      size: 1075765
+    - path: src/features.py
+      hash: md5
+      md5: 0de324bff127c8e213be4fe88c1f8e52
+      size: 2885
+    params:
+      configs/params.yaml:
+        features:
+          target: Global_active_power
+          lags:
+          - 1
+          - 2
+          - 3
+          - 6
+          - 12
+          - 24
+          - 48
+          - 168
+          rolling_windows:
+          - 3
+          - 6
+          - 24
+          - 168
+    outs:
+    - path: data/processed/features.parquet
+      hash: md5
+      md5: 02a8ced0425b6089ea491a8193529ac4
+      size: 4738712
+  train:
+    cmd: python -m src.train
+    deps:
+    - path: data/processed/features.parquet
+      hash: md5
+      md5: 02a8ced0425b6089ea491a8193529ac4
+      size: 4738712
+    - path: src/features.py
+      hash: md5
+      md5: 0de324bff127c8e213be4fe88c1f8e52
+      size: 2885
+    - path: src/train.py
+      hash: md5
+      md5: d98cd0f41215c1db029b2f044496d69c
+      size: 10104
+    params:
+      configs/params.yaml:
+        models:
+          linear_regression: {}
+          ridge_regression:
+            alpha: 1.0
+          decision_tree:
+            random_state: 42
+          knn:
+            n_neighbors: 10
+          svm:
+            C: 1.0
+            epsilon: 0.1
+          random_forest:
+            n_estimators: 200
+            max_depth: 16
+            min_samples_leaf: 5
+            n_jobs: -1
+            random_state: 42
+          hist_gradient_boosting:
+            max_iter: 500
+            learning_rate: 0.05
+            max_leaf_nodes: 31
+            l2_regularization: 1.0
+            random_state: 42
+        split:
+          train_end: '2009-12-31 23:00:00'
+          val_end: '2010-05-31 23:00:00'
+        tuning:
+          cv_splits: 5
+          scoring: neg_mean_absolute_error
+          grids:
+            ridge_regression:
+              alpha:
+              - 0.01
+              - 0.1
+              - 1.0
+              - 10.0
+              - 100.0
+            decision_tree:
+              max_depth:
+              - 4
+              - 6
+              - 8
+              - 10
+              - 14
+              - 
+              min_samples_leaf:
+              - 1
+              - 10
+              - 50
+              - 100
+            knn:
+              n_neighbors:
+              - 5
+              - 10
+              - 20
+              - 40
+              weights:
+              - uniform
+              - distance
+            random_forest:
+              max_depth:
+              - 10
+              - 16
+              - 
+              min_samples_leaf:
+              - 1
+              - 5
+              - 20
+            hist_gradient_boosting:
+              learning_rate:
+              - 0.03
+              - 0.05
+              - 0.1
+              max_leaf_nodes:
+              - 15
+              - 31
+              - 63
+    outs:
+    - path: models/metadata.json
+      hash: md5
+      md5: 073c255e10d0f25c552e2bdac7008cab
+      size: 1538
+    - path: models/model.joblib
+      hash: md5
+      md5: 49903bb2f3e6e18cac2127cee0deb780
+      size: 997998
+    - path: reports/metrics.json
+      hash: md5
+      md5: 0cc1ff581f71a0867998a5bfdfd5c874
+      size: 5953
+    - path: reports/test_predictions.parquet
+      hash: md5
+      md5: 292a4a98578a8e52f0581566a113e1db
+      size: 101896
+  classify:
+    cmd: python -m src.classify
+    deps:
+    - path: data/processed/features.parquet
+      hash: md5
+      md5: 02a8ced0425b6089ea491a8193529ac4
+      size: 4738712
+    - path: reports/test_predictions.parquet
+      hash: md5
+      md5: 292a4a98578a8e52f0581566a113e1db
+      size: 101896
+    - path: src/classify.py
+      hash: md5
+      md5: c7f5f132cb39dfdc60b81d31e3bd56ab
+      size: 6283
+    params:
+      configs/params.yaml:
+        classification:
+          threshold_quantile: 0.75
+          decision_tree:
+            random_state: 42
+          grid:
+            max_depth:
+            - 3
+            - 5
+            - 7
+            - 9
+            - 12
+            - 
+            min_samples_leaf:
+            - 1
+            - 10
+            - 50
+            - 100
+            class_weight:
+            - 
+            - balanced
+        split:
+          train_end: '2009-12-31 23:00:00'
+          val_end: '2010-05-31 23:00:00'
+    outs:
+    - path: models/peak_classifier.joblib
+      hash: md5
+      md5: 2f57a99f44687c2a76fae307f016e79b
+      size: 50169
+    - path: models/peak_classifier.json
+      hash: md5
+      md5: 09e85bbafed090b0cefeec9bf3db2e59
+      size: 190
+    - path: reports/classification.json
+      hash: md5
+      md5: 48e69bb1da21b8122ca9e9bd893d6503
+      size: 16026
+  monitor:
+    cmd: python -m src.monitor
+    deps:
+    - path: models/model.joblib
+      hash: md5
+      md5: 49903bb2f3e6e18cac2127cee0deb780
+      size: 997998
+    - path: reports/test_predictions.parquet
+      hash: md5
+      md5: 292a4a98578a8e52f0581566a113e1db
+      size: 101896
+    - path: src/monitor.py
+      hash: md5
+      md5: c6151d9564508d1a18433e5cfa1f6e6a
+      size: 2314
+    params:
+      configs/params.yaml:
+        monitoring:
+          psi_threshold: 0.2
+          mae_degradation_pct: 20
+    outs:
+    - path: reports/monitoring.json
+      hash: md5
+      md5: 1368dbb705474af9deffae93fd770691
+      size: 424
+  evaluate:
+    cmd: python -m src.evaluate
+    deps:
+    - path: models/model.joblib
+      hash: md5
+      md5: 49903bb2f3e6e18cac2127cee0deb780
+      size: 997998
+    - path: reports/classification.json
+      hash: md5
+      md5: 48e69bb1da21b8122ca9e9bd893d6503
+      size: 16026
+    - path: reports/monitoring.json
+      hash: md5
+      md5: 1368dbb705474af9deffae93fd770691
+      size: 424
+    - path: src/evaluate.py
+      hash: md5
+      md5: 3357b98e0234d50a1218fd61fd6a03a2
+      size: 13655
+    outs:
+    - path: reports/fairness.json
+      hash: md5
+      md5: 280c7452135dfb2a801ccf1fb532d6e2
+      size: 1057
+    - path: reports/figures
+      hash: md5
+      md5: 36418ae35ca722c8d3f850d86d3fb64f.dir
+      size: 810355
+      nfiles: 17
+  export_web:
+    cmd: python -m src.export_web
+    deps:
+    - path: models/model.joblib
+      hash: md5
+      md5: 49903bb2f3e6e18cac2127cee0deb780
+      size: 997998
+    - path: reports/classification.json
+      hash: md5
+      md5: 48e69bb1da21b8122ca9e9bd893d6503
+      size: 16026
+    - path: reports/monitoring.json
+      hash: md5
+      md5: 1368dbb705474af9deffae93fd770691
+      size: 424
+    - path: src/export_web.py
+      hash: md5
+      md5: 483b46656b7dc5cad12dc8b13398f3d7
+      size: 3172
+    outs:
+    - path: data/serving/recent_hourly.csv
+      hash: md5
+      md5: c602c9d649ef45cd440fca3263210771
+      size: 336866
+    - path: web/public/data/dashboard.json
+      hash: md5
+      md5: 9a1341d714b0b437eb020aa14618e0f5
+      size: 85553

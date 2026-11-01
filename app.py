@@ -1,15 +1,24 @@
-"""Web entrypoint (Vercel / Docker): prediction API under /api, web dashboard at /."""
+"""Web entrypoint (Vercel / Docker / local): Flask API under /api, React site at /."""
 from pathlib import Path
 
-from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
+from flask import Flask, send_from_directory
 
-from serving.main import app as api_app
+from serving.main import api
 
-app = FastAPI(title="VoltCast - Household Electricity Consumption Prediction System", docs_url=None, redoc_url=None)
-app.mount("/api", api_app)
-
-# On Vercel the CDN serves public/ directly; locally and in Docker the app serves it.
 PUBLIC = Path(__file__).parent / "public"
-if PUBLIC.exists():
-    app.mount("/", StaticFiles(directory=PUBLIC, html=True), name="web")
+
+app = Flask(__name__, static_folder=None)
+app.config["MAX_CONTENT_LENGTH"] = 2 * 1024 * 1024  # reject oversized request bodies
+app.register_blueprint(api, url_prefix="/api")
+
+
+# On Vercel the CDN serves public/ directly; locally and in Docker Flask serves the built React site.
+@app.get("/")
+@app.get("/<path:path>")
+def web(path: str = "index.html"):
+    target = PUBLIC / path
+    return send_from_directory(PUBLIC, path if target.is_file() else "index.html")
+
+
+if __name__ == "__main__":
+    app.run(port=8000, debug=False)

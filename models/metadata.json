@@ -1,7 +1,15 @@
 {
   "model_name": "hist_gradient_boosting",
-  "trained_at": "2026-11-01T17:21:40+00:00",
-  "mlflow_run_id": "b7a5f2bb55a44a3e939df1fd20923d92",
+  "hyperparameters": {
+    "max_iter": 500,
+    "learning_rate": 0.05,
+    "max_leaf_nodes": 31,
+    "l2_regularization": 1.0,
+    "random_state": 42
+  },
+  "tuned": false,
+  "trained_at": "2026-11-01T17:49:31+00:00",
+  "mlflow_run_id": "9d8c316ea235485dad51842102f52bf9",
   "features": [
     "hour",
     "dayofweek",
@@ -45,12 +53,14 @@
   ],
   "test_metrics": {
     "mae": 0.2934236884615469,
+    "mse": 0.18659425185159015,
     "rmse": 0.4319655679004869,
     "r2": 0.6227160753609795,
     "mape": 39.49231062570404
   },
   "baseline_test_metrics": {
     "mae": 0.37725552916526794,
+    "mse": 0.3289504945278168,
     "rmse": 0.573542059946624,
     "r2": 0.3348791003227234,
     "mape": 46.87059783935547

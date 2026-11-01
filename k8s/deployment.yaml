@@ -1,0 +1,64 @@
+# Kubernetes deployment of the VoltCast API (same image as docker-compose).
+# Build and load the image first, e.g. with minikube:
+#   docker build -t voltcast:latest . && minikube image load voltcast:latest
+#   kubectl apply -f k8s/
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: voltcast-api
+  labels: {app: voltcast-api}
+spec:
+  replicas: 2
+  selector:
+    matchLabels: {app: voltcast-api}
+  template:
+    metadata:
+      labels: {app: voltcast-api}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /api/metrics
+        prometheus.io/port: "8000"
+    spec:
+      containers:
+        - name: api
+          image: voltcast:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          resources:
+            requests: {cpu: 250m, memory: 512Mi}
+            limits: {cpu: "1", memory: 1Gi}
+          readinessProbe:
+            httpGet: {path: /api/health, port: 8000}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: {path: /api/health, port: 8000}
+            initialDelaySeconds: 20
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: voltcast-api
+spec:
+  type: NodePort
+  selector: {app: voltcast-api}
+  ports:
+    - port: 80
+      targetPort: 8000
+      nodePort: 30080
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: voltcast-api
+spec:
+  scaleTargetRef: {apiVersion: apps/v1, kind: Deployment, name: voltcast-api}
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target: {type: Utilization, averageUtilization: 70}

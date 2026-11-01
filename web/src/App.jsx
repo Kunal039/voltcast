@@ -1,23 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import Plot, { COLORS } from "./components/Plot.jsx";
 import Forecast from "./components/Forecast.jsx";
+import ModelPerformance from "./components/ModelPerformance.jsx";
+import PeakAlerts from "./components/PeakAlerts.jsx";
+import ResponsibleAI from "./components/ResponsibleAI.jsx";
+import Section, { hbar } from "./components/Section.jsx";
 
 const REPO = "https://github.com/Kunal039/voltcast";
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const pretty = (s) => s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-const isBaseline = (n) => /baseline|naive/.test(n);
-const hbar = { margin: { t: 36, r: 12, b: 40, l: 160 }, hovermode: "closest",
-  xaxis: { type: "linear", gridcolor: "#eef0f3" }, yaxis: { type: "category", automargin: true } };
-
-function Section({ title, sub, children }) {
-  return (
-    <section>
-      <h2>{title}</h2>
-      {sub && <p className="sub">{sub}</p>}
-      {children}
-    </section>
-  );
-}
 
 function Kpis({ D }) {
   const T = D.model.test_metrics, B = D.model.baseline_test_metrics;
@@ -38,51 +28,6 @@ function Kpis({ D }) {
   );
 }
 
-function ModelPerformance({ D }) {
-  const V = D.metrics.validation;
-  const names = Object.keys(V);
-  const best = names.filter((n) => !isBaseline(n)).reduce((a, b) => (V[a].rmse < V[b].rmse ? a : b));
-  const charts = useMemo(() => ({
-    mae: [{ type: "bar", x: names.map((n) => pretty(n).replace(/ /g, "<br>")), y: names.map((n) => V[n].mae),
-      marker: { color: names.map((n) => (n === best ? COLORS.orange : isBaseline(n) ? COLORS.grey : COLORS.blue)) } }],
-    test: [
-      { x: D.test_window.x, y: D.test_window.actual, name: "Actual", line: { color: COLORS.grey, width: 1.5 } },
-      { x: D.test_window.x, y: D.test_window.predicted, name: "Predicted (next hour)", line: { color: COLORS.orange, width: 1.5 } },
-    ],
-    imp: [{ type: "bar", orientation: "h", x: D.importance.values, y: D.importance.names, marker: { color: COLORS.blue } }],
-  }), [D]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  return (
-    <Section title="Model performance"
-      sub="Five candidates trained on 2006–2009, compared on Jan–May 2010 (validation) and tracked in MLflow. The winner is refit and scored once on the untouched test period.">
-      <div className="grid2">
-        <div className="card">
-          <table>
-            <thead><tr><th>Model</th><th>MAE</th><th>RMSE</th><th>R²</th><th>Fit (s)</th></tr></thead>
-            <tbody>
-              {names.map((n) => (
-                <tr key={n} className={n === best ? "best" : ""}>
-                  <td>{pretty(n)}</td><td>{V[n].mae.toFixed(3)}</td><td>{V[n].rmse.toFixed(3)}</td>
-                  <td>{V[n].r2.toFixed(3)}</td><td>{V[n].fit_seconds.toFixed(2)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="card">
-          <Plot data={charts.mae} title="Validation MAE (kW, lower is better)" height={300}
-            layout={{ hovermode: "closest", xaxis: { tickangle: 0 }, margin: { t: 36, r: 12, b: 70, l: 50 } }} />
-        </div>
-      </div>
-      <div className="grid2 gap">
-        <div className="card"><Plot data={charts.test} title="Test set: last 14 days, next-hour forecasts"
-          layout={{ xaxis: { type: "date", gridcolor: "#eef0f3" } }} /></div>
-        <div className="card"><Plot data={charts.imp} title="Top features (permutation importance)" layout={hbar} /></div>
-      </div>
-    </Section>
-  );
-}
-
 function DataExplorer({ D }) {
   const charts = useMemo(() => ({
     daily: [{ x: D.daily.x, y: D.daily.y, line: { color: COLORS.blue, width: 1 }, name: "Daily mean kW" }],
@@ -96,7 +41,7 @@ function DataExplorer({ D }) {
   const s = D.stats;
   return (
     <Section title="Data explorer"
-      sub={`${s.raw_rows.toLocaleString()} one-minute readings (${s.raw_missing_pct}% missing) from a house in Sceaux, France, cleaned into ${s.hourly_rows.toLocaleString()} hourly records.`}>
+      sub={`${s.raw_rows.toLocaleString("en-US")} one-minute readings (${s.raw_missing_pct}% missing) from a house in Sceaux, France, cleaned into ${s.hourly_rows.toLocaleString("en-US")} hourly records.`}>
       <div className="card"><Plot data={charts.daily} title="Daily mean active power, Dec 2006 – Nov 2010" height={300}
         layout={{ xaxis: { type: "date", gridcolor: "#eef0f3" } }} /></div>
       <div className="grid2 gap">
@@ -137,29 +82,42 @@ function Monitoring({ D }) {
 
 function Pipeline() {
   const stack = [
-    ["Pipeline", "run_pipeline.py · dvc.yaml"], ["Tracking & registry", "MLflow"],
-    ["Serving", "FastAPI · Docker · Vercel"], ["Web", "React · Vite · Plotly"],
-    ["CI / CT", "GitHub Actions · pytest"], ["Monitoring", "PSI drift · rolling MAE"],
+    ["Pipeline & versioning", "dvc.yaml · dvc.lock · Git"], ["Tracking & registry", "MLflow"],
+    ["Serving", "Flask REST API · gunicorn"], ["Deployment", "Docker · Kubernetes · Vercel"],
+    ["CI / CT", "GitHub Actions · pytest"], ["Monitoring", "Prometheus · Grafana · PSI drift"],
   ];
   return (
     <Section title="MLOps pipeline" sub="Every stage is a tested Python module driven by one config file; GitHub Actions re-runs it on each push and weekly.">
       <div className="card">
         <img className="arch" src="/img/architecture.png"
-          alt="Architecture: data ingestion, preprocessing, features, training with MLflow, registry, FastAPI, dashboard, monitoring and CI/CT" />
+          alt="Architecture: data ingestion, preprocessing, features, training with MLflow, registry, Flask API, web app, Prometheus and Grafana monitoring and CI/CT" />
         <div className="stack">{stack.map(([t, d]) => <div key={t}><b>{t}</b>{d}</div>)}</div>
       </div>
     </Section>
   );
 }
 
+const ENDPOINTS = [
+  ["GET", "/api/health", "Liveness check and loaded model"],
+  ["GET", "/api/model-info", "Model, hyper-parameters, training window, test metrics"],
+  ["GET", "/api/forecast?origin=&horizon=", "Forecast from a point in the test period, with actual values"],
+  ["POST", "/api/predict", "Forecast from your own 169+ hourly readings (JSON)"],
+  ["GET", "/api/sample-request", "Ready-made body for POST /api/predict"],
+  ["GET", "/api/metrics", "Prometheus metrics: requests, latency, forecasts, peak alerts"],
+];
+
 function ApiUsage() {
   const host = window.location.origin;
   return (
-    <Section title="Use the API" sub="The same model is exposed as a REST API.">
+    <Section id="api" title="REST API (Flask)" sub="The same models are served by a Flask REST API. Prometheus scrapes /api/metrics; Grafana shows the dashboard (see docker-compose.yml).">
       <pre>{`curl "${host}/api/forecast?origin=2010-11-20T08:00&horizon=6"
 curl -s ${host}/api/sample-request > req.json
 curl -X POST ${host}/api/predict -H "Content-Type: application/json" -d @req.json`}</pre>
-      <p className="sub">Full interactive docs at <a href="/api/docs">/api/docs</a>.</p>
+      <table className="endpoints">
+        <tbody>
+          {ENDPOINTS.map(([m, path, d]) => <tr key={path}><td><code>{m}</code></td><td><code>{path}</code></td><td>{d}</td></tr>)}
+        </tbody>
+      </table>
     </Section>
   );
 }
@@ -185,7 +143,7 @@ export default function App() {
             trained on 2.07 million smart-meter readings from the UCI Individual Household Electric Power Consumption dataset.</p>
           <div className="links">
             <a href="#forecast">Try a forecast</a>
-            <a href="/api/docs">API docs</a>
+            <a href="#api">REST API</a>
             <a href={REPO}>GitHub repository</a>
           </div>
         </div>
@@ -202,8 +160,10 @@ export default function App() {
               <Forecast range={D.forecast_range} />
             </section>
             <ModelPerformance D={D} />
+            <PeakAlerts D={D} />
             <DataExplorer D={D} />
             <Monitoring D={D} />
+            <ResponsibleAI D={D} />
             <Pipeline />
             <ApiUsage />
           </>

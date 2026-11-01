@@ -3,5 +3,31 @@
   "raw_missing_pct": 1.252,
   "hourly_rows": 34589,
   "start": "2006-12-16 17:00:00",
-  "end": "2010-11-26 21:00:00"
+  "end": "2010-11-26 21:00:00",
+  "outliers": {
+    "Global_active_power": {
+      "lower": -1.513,
+      "upper": 3.431,
+      "count": 738,
+      "pct": 2.13
+    },
+    "Global_reactive_power": {
+      "lower": -0.029,
+      "upper": 0.257,
+      "count": 1674,
+      "pct": 4.84
+    },
+    "Voltage": {
+      "lower": 233.952,
+      "upper": 247.94,
+      "count": 1115,
+      "pct": 3.22
+    },
+    "Global_intensity": {
+      "lower": -6.11,
+      "upper": 14.21,
+      "count": 831,
+      "pct": 2.4
+    }
+  }
 }

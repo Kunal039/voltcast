@@ -19,9 +19,18 @@ features:
   lags: [1, 2, 3, 6, 12, 24, 48, 168]
   rolling_windows: [3, 6, 24, 168]
 
+# Default hyper-parameters of each candidate (keys match the model names used in MLflow).
 models:
-  ridge:
+  linear_regression: {}
+  ridge_regression:
     alpha: 1.0
+  decision_tree:
+    random_state: 42
+  knn:
+    n_neighbors: 10
+  svm:
+    C: 1.0
+    epsilon: 0.1
   random_forest:
     n_estimators: 200
     max_depth: 16
@@ -34,6 +43,36 @@ models:
     max_leaf_nodes: 31
     l2_regularization: 1.0
     random_state: 42
+
+# GridSearchCV with time-series cross-validation (folds never train on the future).
+tuning:
+  cv_splits: 5
+  scoring: neg_mean_absolute_error
+  grids:
+    ridge_regression:
+      alpha: [0.01, 0.1, 1.0, 10.0, 100.0]
+    decision_tree:
+      max_depth: [4, 6, 8, 10, 14, null]
+      min_samples_leaf: [1, 10, 50, 100]
+    knn:
+      n_neighbors: [5, 10, 20, 40]
+      weights: [uniform, distance]
+    random_forest:
+      max_depth: [10, 16, null]
+      min_samples_leaf: [1, 5, 20]
+    hist_gradient_boosting:
+      learning_rate: [0.03, 0.05, 0.1]
+      max_leaf_nodes: [15, 31, 63]
+
+# Peak-hour alert: classify whether the next hour is a high-consumption hour.
+classification:
+  threshold_quantile: 0.75   # of training-period consumption
+  decision_tree:
+    random_state: 42
+  grid:
+    max_depth: [3, 5, 7, 9, 12, null]
+    min_samples_leaf: [1, 10, 50, 100]
+    class_weight: [null, balanced]
 
 mlflow:
   tracking_uri: "sqlite:///mlflow.db"

@@ -44,12 +44,14 @@ def main() -> None:
                         "predicted": preds["predicted"].tolist()},
         "importance": {"names": imp.index.tolist(), "values": imp.round(4).tolist()},
         "forecast_range": [str(recent.index[MIN_HISTORY_HOURS]), str(recent.index[-1])],
+        "classification": json.loads((ROOT / "reports" / "classification.json").read_text()),
+        "fairness": json.loads((ROOT / "reports" / "fairness.json").read_text()),
     }
     out = resolve(params["data"]["web_data"])
     out.write_text(json.dumps(bundle))
     img = ROOT / "web" / "public" / "img"
     img.mkdir(parents=True, exist_ok=True)
-    shutil.copy(ROOT / "reports" / "figures" / "fig_architecture.png", img / "architecture.png")
+    shutil.copy(ROOT / "report" / "diagrams" / "fig_architecture.png", img / "architecture.png")
     log.info("Wrote %d serving rows and dashboard bundle (%.0f KB)", len(recent), out.stat().st_size / 1024)
 
 

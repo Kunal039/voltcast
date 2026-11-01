@@ -52,3 +52,7 @@ pre { background: #10151d; color: #dfe6ef; padding: 14px; border-radius: 10px; o
 .err { color: #b42318; font-size: 13px; margin-top: 8px; }
 footer { color: var(--muted); font-size: 13px; padding: 26px 0 40px; border-top: 1px solid var(--line); margin-top: 40px; }
 @media (max-width: 820px) { .grid2, .fc { grid-template-columns: 1fr; } }
+.kpis.inline { margin-top: 0; }
+.note { color: var(--muted); font-size: 13px; margin: 8px 0 0; }
+.endpoints td { text-align: left; vertical-align: top; }
+.endpoints code { white-space: nowrap; }

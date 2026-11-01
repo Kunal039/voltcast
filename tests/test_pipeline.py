@@ -1,9 +1,11 @@
+import json
+
 import numpy as np
 import pandas as pd
 import pytest
-from fastapi.testclient import TestClient
 
-from serving.main import app
+from app import app
+from src.classify import scores
 from src.features import build_features, feature_columns
 from src.monitor import psi
 from src.predict import MIN_HISTORY_HOURS
@@ -12,7 +14,7 @@ from src.train import metrics
 from src.utils import load_params
 
 PARAMS = load_params()
-client = TestClient(app)
+client = app.test_client()
 
 
 def synthetic_hourly(hours=400):
@@ -60,25 +62,46 @@ def test_psi_detects_shift():
     assert psi(ref, rng.normal(1.5, 1, 5000)) > 0.2
 
 
+def test_classification_scores():
+    s = scores(np.array([0, 0, 1, 1]), np.array([0.1, 0.6, 0.4, 0.9]))
+    assert s["accuracy"] == 0.5 and s["precision"] == 0.5 and s["recall"] == 0.5
+    assert s["confusion_matrix"] == [[1, 1], [1, 1]]
+
+
 def test_health_endpoint():
-    r = client.get("/health")
-    assert r.status_code == 200 and r.json()["status"] == "ok"
+    r = client.get("/api/health")
+    assert r.status_code == 200 and r.get_json()["status"] == "ok"
 
 
 def test_predict_endpoint_returns_horizon():
-    body = client.get("/sample-request").json()
+    body = client.get("/api/sample-request").get_json()
     body["horizon"] = 6
-    r = client.post("/predict", json=body)
-    assert r.status_code == 200, r.text
-    out = r.json()
+    r = client.post("/api/predict", json=body)
+    assert r.status_code == 200, r.get_data(as_text=True)
+    # Strict parse: browsers reject NaN/Infinity, so the API must never emit them.
+    out = json.loads(r.get_data(as_text=True), parse_constant=lambda c: pytest.fail(f"invalid JSON constant {c}"))
     assert len(out["forecast"]) == 6
     assert all(p["lower_kw"] <= p["predicted_kw"] <= p["upper_kw"] for p in out["forecast"])
+    assert 0 <= out["forecast"][0]["peak_probability"] <= 1 and out["forecast"][0]["alert_method"] == "classifier"
+    assert all(p["alert_method"] == "forecast_threshold" for p in out["forecast"][1:])
 
 
 def test_predict_rejects_short_history():
-    body = client.get("/sample-request").json()
+    body = client.get("/api/sample-request").get_json()
     body["history"] = body["history"][: MIN_HISTORY_HOURS - 10]
-    assert client.post("/predict", json=body).status_code == 422
+    assert client.post("/api/predict", json=body).status_code == 422
+
+
+def test_predict_rejects_invalid_reading():
+    body = client.get("/api/sample-request").get_json()
+    body["history"][0]["Voltage"] = -5
+    assert client.post("/api/predict", json=body).status_code == 422
+
+
+def test_prometheus_metrics_exposed():
+    client.get("/api/forecast?origin=2010-11-20T08:00&horizon=3")
+    text = client.get("/api/metrics").get_data(as_text=True)
+    assert "voltcast_predictions_total" in text and "voltcast_request_latency_seconds" in text
 
 
 def test_model_beats_baseline():

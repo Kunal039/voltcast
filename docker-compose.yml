@@ -1,14 +1,42 @@
+# Full local stack: API + web app, Streamlit dashboard, MLflow UI, Prometheus and Grafana.
+#   docker compose up --build
+#   web + API  http://localhost:8000      Streamlit  http://localhost:8501
+#   MLflow     http://localhost:5000      Prometheus http://localhost:9090
+#   Grafana    http://localhost:3000  (dashboard "VoltCast - Model Monitoring", anonymous viewer access)
 services:
   api:
     build: .
+    image: voltcast:latest
     ports: ["8000:8000"]
+    volumes: ["./logs:/app/logs"]          # prediction log: logs/predictions.jsonl
+
   dashboard:
-    build: .
+    image: voltcast:latest
     command: streamlit run dashboard/app.py --server.port 8501 --server.address 0.0.0.0
     ports: ["8501:8501"]
     depends_on: [api]
+
   mlflow:
-    build: .
+    image: voltcast:latest
     command: mlflow ui --backend-store-uri sqlite:///mlflow.db --host 0.0.0.0 --port 5000
     volumes: ["./mlflow.db:/app/mlflow.db", "./mlruns:/app/mlruns"]
     ports: ["5000:5000"]
+    depends_on: [api]
+
+  prometheus:
+    image: prom/prometheus:v2.53.2
+    volumes: ["./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro"]
+    ports: ["9090:9090"]
+    depends_on: [api]
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/voltcast.json
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports: ["3000:3000"]
+    depends_on: [prometheus]

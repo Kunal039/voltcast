@@ -22,3 +22,8 @@ src/preprocess.py
 src/data_ingestion.py
 src/export_web.py
 web/node_modules/
+logs/
+monitoring/
+k8s/
+.dvc/
+dvc.lock

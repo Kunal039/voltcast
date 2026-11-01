@@ -1,0 +1,9 @@
+{
+  "model": "decision_tree_tuned",
+  "threshold_kw": 1.5895000100135803,
+  "hyperparameters": {
+    "class_weight": "balanced",
+    "max_depth": 12,
+    "min_samples_leaf": 50
+  }
+}

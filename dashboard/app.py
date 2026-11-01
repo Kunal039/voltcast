@@ -145,17 +145,17 @@ with tab_ops:
     digraph { rankdir=LR; node [shape=box style="rounded,filled" fillcolor="#eef3fa" fontname=Helvetica];
       A [label="UCI dataset\\n(2.07M rows)"]; B [label="Ingestion &\\nschema check"];
       C [label="Cleaning &\\nhourly resample"]; D [label="Feature\\nengineering"];
-      E [label="Training 5 models\\n+ MLflow tracking"]; F [label="Model registry\\n(best model)"];
-      G [label="FastAPI service\\n(Docker)"]; H [label="Streamlit\\ndashboard"];
-      I [label="Monitoring\\n(PSI, MAE)"]; J [label="GitHub Actions\\nCI: tests + build"];
+      E [label="9 models + GridSearchCV\\n+ MLflow tracking"]; F [label="Model registry\\n(best model)"];
+      G [label="Flask REST API\\n(Docker / K8s / Vercel)"]; H [label="Streamlit\\ndashboard"];
+      I [label="Prometheus + Grafana\\nPSI drift, logs"]; J [label="GitHub Actions\\nCI: dvc repro + tests + build"];
       A->B->C->D->E->F->G->H; G->I; I->E [label="retrain trigger" style=dashed]; J->E [style=dashed];
     }""")
     st.markdown("""
 | Stage | Tool | Artifact |
 |---|---|---|
-| Versioned pipeline | `dvc.yaml`, `run_pipeline.py` | processed data, features |
+| Versioned pipeline | DVC (`dvc.yaml`, `dvc.lock`) | dataset CSV, processed data, features |
 | Experiment tracking | MLflow (SQLite backend) | runs, params, metrics, registered model |
-| Serving | FastAPI + Uvicorn, Docker | `/predict`, `/health`, `/metrics` |
-| CI | GitHub Actions, pytest | test report, Docker image |
-| Monitoring | PSI drift + rolling MAE | `reports/monitoring.json` |
+| Serving | Flask + gunicorn, Docker, Kubernetes, Vercel | `/api/predict`, `/api/forecast`, `/api/health` |
+| CI/CD | GitHub Actions, pytest, Vercel | quality gates, test report, Docker image, deployment |
+| Monitoring | Prometheus, Grafana, PSI drift | `/api/metrics`, `logs/predictions.jsonl`, `reports/monitoring.json` |
 """)

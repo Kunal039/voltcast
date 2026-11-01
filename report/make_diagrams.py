@@ -7,7 +7,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
 
-OUT = Path(__file__).resolve().parents[1] / "reports" / "figures"
+OUT = Path(__file__).resolve().parent / "diagrams"  # kept apart from pipeline-generated figures
+OUT.mkdir(exist_ok=True)
 plt.rcParams.update({"font.family": "serif", "font.size": 9, "figure.dpi": 150})
 BLUE, ORANGE, GREEN, GREY = "#dce8f7", "#fbe3cc", "#dcefdc", "#eeeeee"
 
@@ -38,17 +39,17 @@ def architecture():
     xs = [0.2, 2.6, 5.0, 7.4, 9.8, 12.2]
     labels = ["UCI dataset\n2.07 M minute\nreadings", "Data ingestion\n& schema\nvalidation",
               "Cleaning &\nhourly\nresampling", "Feature\nengineering\n(31 features)",
-              "Model training\n5 candidates\n+ MLflow", "MLflow model\nregistry\n(best model)"]
+              "Train 9 models\nGridSearchCV\n+ MLflow", "MLflow model\nregistry\n(best model)"]
     for x, t in zip(xs, labels):
         box(ax, x, 4.6, 2.0, 1.25, t)
     for a, b in zip(xs, xs[1:]):
         arrow(ax, (a + 2.0, 5.22), (b, 5.22))
     # Row 2: serving & monitoring
-    box(ax, 12.2, 2.3, 2.0, 1.25, "FastAPI service\n(Docker\ncontainer)", ORANGE)
-    box(ax, 9.8, 2.3, 2.0, 1.25, "Streamlit\ndashboard", ORANGE)
+    box(ax, 12.2, 2.3, 2.0, 1.25, "Flask REST API\n(Docker / K8s\n/ Vercel)", ORANGE)
+    box(ax, 9.8, 2.3, 2.0, 1.25, "React web app\n+ Streamlit", ORANGE)
     box(ax, 7.4, 2.3, 2.0, 1.25, "End users /\nsmart-home\napps", GREY)
-    box(ax, 12.2, 0.2, 2.0, 1.25, "Monitoring\nPSI drift +\nrolling MAE", GREEN)
-    box(ax, 0.2, 0.2, 8.6, 1.4, "CI / CT (GitHub Actions): run pipeline -> quality gate (beat baseline)\n"
+    box(ax, 12.2, 0.2, 2.0, 1.25, "Prometheus +\nGrafana, PSI\ndrift, logs", GREEN)
+    box(ax, 0.2, 0.2, 8.6, 1.4, "CI / CT (GitHub Actions): dvc repro -> quality gate (beat baseline)\n"
                              "-> pytest -> Docker build -> upload artifacts\n"
                              "Triggered on push, pull request and a weekly schedule", GREEN, size=8)
     arrow(ax, (13.2, 4.6), (13.2, 3.55))
@@ -70,10 +71,10 @@ def gantt():
         ("Data pipeline: ingestion, cleaning, features", 2, 2),
         ("Model training & MLflow experiment tracking", 4, 2),
         ("Model evaluation & selection", 5, 1.5),
-        ("API (FastAPI) + Docker containerisation", 6, 2),
-        ("Dashboard (Streamlit)", 7, 1.5),
+        ("Flask API, Docker & Kubernetes", 6, 2),
+        ("React web app & Streamlit dashboard", 7, 1.5),
         ("CI/CD (GitHub Actions) + tests", 8, 1.5),
-        ("Monitoring & drift detection", 9, 1),
+        ("Prometheus, Grafana & drift detection", 9, 1),
         ("Report writing & presentation", 9, 3),
     ]
     fig, ax = plt.subplots(figsize=(9, 3.6))
@@ -100,7 +101,7 @@ def alternatives():
         ax.axis("off")
     a = ["Raw CSV", "Notebook: clean +\nfeatures + LSTM", "Pickle file\nsaved manually", "Ad-hoc script\npredictions"]
     b = ["Versioned raw data", "Modular pipeline stages\n(params.yaml / dvc.yaml)",
-         "5 models + MLflow\ntracking & registry", "FastAPI + Docker\n+ Streamlit", "CI/CT + drift\nmonitoring"]
+         "9 models, GridSearchCV\n+ MLflow registry", "Flask API + Docker\n+ React", "CI/CT + drift\nmonitoring"]
     for ax, steps, title, col in [(axes[0], a, "Design A: Notebook-centric deep learning", GREY),
                                   (axes[1], b, "Design B: Modular MLOps pipeline (selected)", BLUE)]:
         ax.set_title(title, fontsize=9.5, weight="bold")
@@ -125,10 +126,10 @@ def flowchart():
              ("Resample to hourly; interpolate gaps <= 6 h", BLUE),
              ("Build lag, rolling & calendar features", BLUE),
              ("Chronological split: train / validation / test", BLUE),
-             ("Train 5 candidate models; log to MLflow", ORANGE),
+             ("Train 9 models + GridSearchCV; log to MLflow", ORANGE),
              ("Select lowest validation RMSE; refit on train+val", ORANGE),
              ("Beats persistence baseline on test?", GREEN),
-             ("Register model, deploy API + dashboard", ORANGE),
+             ("Register model, deploy Flask API + web app", ORANGE),
              ("Monitor PSI drift & rolling MAE", GREEN), ("End / retrain loop", GREY)]
     for i, (s, c) in enumerate(steps):
         y = 12.7 - i * 1.12

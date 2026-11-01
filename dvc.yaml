@@ -1,35 +1,51 @@
-# Reproducible pipeline definition (run with `dvc repro`), mirrors run_pipeline.py.
+# Reproducible pipeline (`dvc repro`), mirrors run_pipeline.py.
+# The dataset and processed data are versioned in the DVC cache; small artifacts that the
+# hosted app needs (model, metrics, serving data) are also committed to Git, so they use cache: false.
 stages:
   ingest:
     cmd: python -m src.data_ingestion
     deps: [src/data_ingestion.py]
-    params: [configs/params.yaml:data]
+    params: [{configs/params.yaml: [data.url]}]
     outs: [data/household_power_consumption.csv]
   preprocess:
     cmd: python -m src.preprocess
     deps: [src/preprocess.py, data/household_power_consumption.csv]
+    params: [{configs/params.yaml: [data.resample_rule, data.max_interp_gap_hours]}]
     outs: [data/processed/hourly.parquet]
     metrics: [reports/data_stats.json: {cache: false}]
   features:
     cmd: python -m src.features
     deps: [src/features.py, data/processed/hourly.parquet]
-    params: [configs/params.yaml:features]
+    params: [{configs/params.yaml: [features]}]
     outs: [data/processed/features.parquet]
   train:
     cmd: python -m src.train
-    deps: [src/train.py, data/processed/features.parquet]
-    params: [configs/params.yaml:split, configs/params.yaml:models]
-    outs: [models/model.joblib, models/metadata.json]
+    deps: [src/train.py, src/features.py, data/processed/features.parquet]
+    params: [{configs/params.yaml: [split, models, tuning]}]
+    outs:
+      - models/model.joblib: {cache: false}
+      - models/metadata.json: {cache: false}
+      - reports/test_predictions.parquet: {cache: false}
     metrics: [reports/metrics.json: {cache: false}]
+  classify:
+    cmd: python -m src.classify
+    deps: [src/classify.py, data/processed/features.parquet, reports/test_predictions.parquet]
+    params: [{configs/params.yaml: [split, classification]}]
+    outs: [models/peak_classifier.joblib: {cache: false}, models/peak_classifier.json: {cache: false}]
+    metrics: [reports/classification.json: {cache: false}]
   monitor:
     cmd: python -m src.monitor
-    deps: [src/monitor.py, models/model.joblib]
+    deps: [src/monitor.py, models/model.joblib, reports/test_predictions.parquet]
+    params: [{configs/params.yaml: [monitoring]}]
     metrics: [reports/monitoring.json: {cache: false}]
   evaluate:
     cmd: python -m src.evaluate
-    deps: [src/evaluate.py, models/model.joblib, reports/monitoring.json]
-    plots: [reports/figures]
+    deps: [src/evaluate.py, models/model.joblib, reports/monitoring.json, reports/classification.json]
+    outs: [reports/figures: {cache: false}]
+    metrics: [reports/fairness.json: {cache: false}]
   export_web:
     cmd: python -m src.export_web
-    deps: [src/export_web.py, models/model.joblib, reports/monitoring.json]
-    outs: [data/serving/recent_hourly.csv: {cache: false}, web/public/data/dashboard.json: {cache: false}]
+    deps: [src/export_web.py, models/model.joblib, reports/monitoring.json, reports/classification.json]
+    outs:
+      - data/serving/recent_hourly.csv: {cache: false}
+      - web/public/data/dashboard.json: {cache: false}

@@ -1,0 +1,13 @@
+.git
+.dvc/cache
+.vercel
+data/household_power_consumption.csv
+data/processed/features.parquet
+web/node_modules
+public
+mlruns
+mlflow.db
+logs
+report
+**/__pycache__
+.pytest_cache
