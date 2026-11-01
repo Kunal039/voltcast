@@ -627,7 +627,8 @@ para(f"The most important inputs are {top}. The previous hour's current intensit
      "household's current state, the water-heater/AC sub-meter signals heavy thermal loads, and the hour "
      "encodings capture daily routines, which is physically consistent.")
 
-para("**Deployment validation.** The FastAPI service was started locally and in Docker. A forecast request "
+para("**Deployment validation.** The FastAPI service and web dashboard are deployed on Vercel at https://household-power-forecast.vercel.app, "
+     "auto-deployed from the GitHub repository. The service was also run locally. A forecast request "
      "with one week of history returned a 24-hour forecast with intervals in well under one second. "
      "Interactive OpenAPI documentation is served at /docs (see User Manual).")
 para("**Automated testing.** The pytest suite (Table 4.3) passes in about 3 seconds and runs in CI on every push.")
@@ -749,10 +750,12 @@ table(["Item", "Status"], [
 
 # ================= USER MANUAL =================
 unnumbered("USER MANUAL", "M")
+para("**Hosted version (no installation):** open https://household-power-forecast.vercel.app for the web dashboard and live forecasts, "
+     "and https://household-power-forecast.vercel.app/api/docs for the API. Source code: https://github.com/Kunal039/household-electricity-consumption-prediction.")
 para("**Prerequisites:** Python 3.10 or newer, about 1 GB free disk space, internet access for the first "
      "run (dataset download, ~20 MB). Docker Desktop is optional.")
 steps = [
-    ("Get the project", "Copy or clone the project folder and open a terminal inside it."),
+    ("Get the project", "git clone https://github.com/Kunal039/household-electricity-consumption-prediction.git   then open a terminal inside the folder."),
     ("Install dependencies", "pip install -r requirements-dev.txt"),
     ("Run the complete pipeline", "python run_pipeline.py   (downloads data, preprocesses, builds features, "
      "trains and registers the model, runs monitoring and creates all figures; about 1 minute)"),

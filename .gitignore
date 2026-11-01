@@ -8,3 +8,6 @@ mlruns/
 mlflow.db
 report/~$*
 .claude/
+
+.vercel
+.env*
