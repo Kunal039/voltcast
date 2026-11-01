@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 
 from serving.main import app as api_app
 
-app = FastAPI(title="Household Electricity Consumption Prediction System", docs_url=None, redoc_url=None)
+app = FastAPI(title="VoltCast - Household Electricity Consumption Prediction System", docs_url=None, redoc_url=None)
 app.mount("/api", api_app)
 
 # On Vercel the CDN serves public/ directly; locally and in Docker the app serves it.

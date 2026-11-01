@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import Plot, { COLORS } from "./components/Plot.jsx";
 import Forecast from "./components/Forecast.jsx";
 
-const REPO = "https://github.com/Kunal039/household-electricity-consumption-prediction";
+const REPO = "https://github.com/Kunal039/voltcast";
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const pretty = (s) => s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 const isBaseline = (n) => /baseline|naive/.test(n);
@@ -179,7 +179,8 @@ export default function App() {
     <>
       <header>
         <div className="wrap">
-          <h1>⚡ Household Electricity Consumption Prediction System</h1>
+          <h1>⚡ VoltCast</h1>
+          <p className="tagline">Household Electricity Consumption Prediction System</p>
           <p>An end-to-end MLOps project that forecasts a household's hourly electricity use for the next 1–48 hours,
             trained on 2.07 million smart-meter readings from the UCI Individual Household Electric Power Consumption dataset.</p>
           <div className="links">
@@ -209,7 +210,7 @@ export default function App() {
         )}
       </main>
       <footer>
-        <div className="wrap">MLOps project · Chandigarh University · Kunal Mittal, Ansh Kumar, Vishal Kumar Shrivastava ·
+        <div className="wrap">VoltCast · MLOps project · Chandigarh University · Kunal Mittal, Ansh Kumar, Vishal Kumar Shrivastava ·
           Data: G. Hebrail &amp; A. Berard, UCI Machine Learning Repository (CC BY 4.0)</div>
       </footer>
     </>

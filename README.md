@@ -1,11 +1,13 @@
-# ⚡ Household Electricity Consumption Prediction System
+# ⚡ VoltCast
+
+**Household Electricity Consumption Prediction System**
 
 An end-to-end **MLOps** project that forecasts a household's hourly electricity consumption (kW) for the next 1–48 hours.
 
 - **Dataset:** [UCI Individual Household Electric Power Consumption](https://archive.ics.uci.edu/dataset/235/individual+household+electric+power+consumption) — 2,075,259 one-minute readings, Dec 2006 – Nov 2010 (downloaded automatically).
 - **Best model:** Histogram Gradient Boosting — test MAE **0.293 kW**, RMSE **0.432 kW**, R² **0.623** (22% lower MAE than the persistence baseline).
 - **Web app:** React (Vite) + Plotly, calling the FastAPI model service
-- **Live demo:** https://household-power-forecast.vercel.app (web dashboard; API docs at [/api/docs](https://household-power-forecast.vercel.app/api/docs), auto-deployed from this repo by Vercel)
+- **Live demo:** https://voltcast-forecast.vercel.app (web dashboard; API docs at [/api/docs](https://voltcast-forecast.vercel.app/api/docs), auto-deployed from this repo by Vercel)
 - **MLOps stack:** config-driven pipeline (`params.yaml`, `dvc.yaml`), MLflow tracking + model registry, FastAPI + Docker serving, Streamlit dashboard, GitHub Actions CI/CT, PSI drift monitoring, pytest.
 
 ## Project structure

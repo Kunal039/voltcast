@@ -11,7 +11,7 @@ from src.predict import MIN_HISTORY_HOURS, forecast, load_model
 from src.utils import ROOT, load_params
 
 app = FastAPI(
-    title="Household Electricity Consumption Prediction API",
+    title="VoltCast API - Household Electricity Consumption Prediction",
     description="Forecasts hourly household active power (kW) from recent smart-meter readings.",
     version="1.0.0",
 )

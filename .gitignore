@@ -13,3 +13,6 @@ report/~$*
 .env*
 /public/
 web/node_modules/
+
+.vercel
+.env*

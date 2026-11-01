@@ -262,7 +262,7 @@ unnumbered("ABSTRACT")
 para(f"Residential buildings account for a large share of national electricity demand, yet most households "
      "receive only a monthly bill and have no forward-looking view of their consumption. Utilities, in turn, "
      "need short-term load forecasts at the household level to plan demand-response programmes as smart "
-     "meters are rolled out. This project develops a **Household Electricity Consumption Prediction System** "
+     "meters are rolled out. This project develops **VoltCast**, a Household Electricity Consumption Prediction System "
      "that forecasts a household's hourly active power for the next 1–48 hours and is engineered "
      "end to end following Machine Learning Operations (MLOps) practice.")
 para(f"The system uses the public UCI “Individual Household Electric Power Consumption” dataset: "
@@ -627,7 +627,7 @@ para(f"The most important inputs are {top}. The previous hour's current intensit
      "household's current state, the water-heater/AC sub-meter signals heavy thermal loads, and the hour "
      "encodings capture daily routines, which is physically consistent.")
 
-para("**Deployment validation.** The FastAPI service and web dashboard are deployed on Vercel at https://household-power-forecast.vercel.app, "
+para("**Deployment validation.** The FastAPI service and web dashboard are deployed on Vercel at https://voltcast-forecast.vercel.app, "
      "as a React single-page app backed by the FastAPI function, auto-deployed from the GitHub repository. The service was also run locally. A forecast request "
      "with one week of history returned a 24-hour forecast with intervals in well under one second. "
      "Interactive OpenAPI documentation is served at /docs (see User Manual).")
@@ -665,7 +665,7 @@ table(["Objective (Section 2.6)", "Target", "Achieved"], [
 # ================= CHAPTER 5 =================
 chapter(5, "CONCLUSION AND FUTURE WORK")
 heading("5.1. Conclusion", 2)
-para("This project delivered a complete, working Household Electricity Consumption Prediction System built "
+para("This project delivered VoltCast, a complete, working Household Electricity Consumption Prediction System built "
      "on MLOps principles. Starting from 2.07 million raw smart-meter readings, the automated pipeline "
      "produces a clean hourly series, 31 leakage-free features and five tracked models. The selected "
      f"Histogram Gradient Boosting model forecasts next-hour consumption with a test MAE of {T['mae']:.3f} kW "
@@ -750,18 +750,18 @@ table(["Item", "Status"], [
 
 # ================= USER MANUAL =================
 unnumbered("USER MANUAL", "M")
-para("**Hosted version (no installation):** open https://household-power-forecast.vercel.app for the web dashboard and live forecasts, "
-     "and https://household-power-forecast.vercel.app/api/docs for the API. Source code: https://github.com/Kunal039/household-electricity-consumption-prediction.")
+para("**Hosted version (no installation):** open https://voltcast-forecast.vercel.app for the web dashboard and live forecasts, "
+     "and https://voltcast-forecast.vercel.app/api/docs for the API. Source code: https://github.com/Kunal039/voltcast.")
 para("**Prerequisites:** Python 3.10 or newer, about 1 GB free disk space, internet access for the first "
      "run (dataset download, ~20 MB). Docker Desktop is optional.")
 steps = [
-    ("Get the project", "git clone https://github.com/Kunal039/household-electricity-consumption-prediction.git   then open a terminal inside the folder."),
+    ("Get the project", "git clone https://github.com/Kunal039/voltcast.git   then open a terminal inside the folder."),
     ("Install dependencies", "pip install -r requirements-dev.txt"),
     ("Run the complete pipeline", "python run_pipeline.py   (downloads data, preprocesses, builds features, "
      "trains and registers the model, runs monitoring and creates all figures; about 1 minute)"),
     ("Run the tests", "pytest -q   (8 tests should pass)"),
     ("Inspect experiments in MLflow", "mlflow ui --backend-store-uri sqlite:///mlflow.db   then open "
-     "http://localhost:5000 to compare runs and see the registered model household-power-forecaster."),
+     "http://localhost:5000 to compare runs and see the registered model voltcast-forecaster."),
     ("Start the prediction API", "uvicorn app:app --port 8000   then open http://localhost:8000/api/docs "
      "(Figure M.1). Use GET /api/sample-request to obtain a ready-made input, then paste it into POST /api/predict "
      "and click Execute."),

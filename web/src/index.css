@@ -10,6 +10,7 @@ a { color: #1f5fa8; }
 header { background: linear-gradient(135deg, #0f2f57 0%, #1f5fa8 60%, #2b74c4 100%); color: #fff; padding: 44px 0 36px; }
 header h1 { margin: 0 0 8px; font-size: clamp(26px, 4vw, 38px); letter-spacing: -.02em; }
 header p { margin: 0; color: #d6e4f5; max-width: 760px; }
+header .tagline { color: #fff; font-size: 18px; font-weight: 600; margin: -4px 0 10px; }
 .links { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px; }
 .links a { color: #fff; text-decoration: none; border: 1px solid rgba(255,255,255,.35); padding: 7px 14px; border-radius: 999px; font-size: 14px; }
 .links a:hover { background: rgba(255,255,255,.12); }

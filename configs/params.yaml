@@ -1,4 +1,4 @@
-# Central configuration for the Household Electricity Consumption Prediction pipeline.
+# Central configuration for the VoltCast (Household Electricity Consumption Prediction) pipeline.
 data:
   url: "https://archive.ics.uci.edu/static/public/235/individual+household+electric+power+consumption.zip"
   raw_zip: data/raw/household_power.zip
@@ -39,7 +39,7 @@ models:
 mlflow:
   tracking_uri: "sqlite:///mlflow.db"
   experiment: household-electricity-forecasting
-  registered_model: household-power-forecaster
+  registered_model: voltcast-forecaster
 
 monitoring:
   psi_threshold: 0.2

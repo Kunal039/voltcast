@@ -12,7 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from src.predict import MIN_HISTORY_HOURS, forecast, load_model  # noqa: E402
 from src.utils import ROOT, load_params  # noqa: E402
 
-st.set_page_config(page_title="Household Electricity Forecasting", page_icon="⚡", layout="wide")
+st.set_page_config(page_title="VoltCast", page_icon="⚡", layout="wide")
 PARAMS = load_params()
 TARIFF = 0.18  # EUR per kWh, used only for the cost estimate
 
@@ -32,7 +32,8 @@ _, meta = load_model()
 metrics = read_json("metrics.json")
 monitor = read_json("monitoring.json")
 
-st.title("⚡ Household Electricity Consumption Prediction System")
+st.title("⚡ VoltCast")
+st.subheader("Household Electricity Consumption Prediction System")
 st.caption("MLOps project · UCI Individual Household Electric Power Consumption dataset "
            "(Sceaux, France, Dec 2006 – Nov 2010, 2.07 M one-minute readings)")
 

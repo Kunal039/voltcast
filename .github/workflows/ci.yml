@@ -32,7 +32,7 @@ jobs:
       - name: Build React web app (into public/, used by Docker and Vercel)
         run: cd web && npm ci && npm run build
       - name: Build Docker image
-        run: docker build -t household-power-api:${{ github.sha }} .
+        run: docker build -t voltcast-api:${{ github.sha }} .
       - uses: actions/upload-artifact@v4
         with:
           name: model-and-reports
