@@ -1,0 +1,59 @@
+{
+  "model_name": "hist_gradient_boosting",
+  "trained_at": "2026-11-01T16:09:16+00:00",
+  "mlflow_run_id": "f61638b577a8461a8259c50b099c6391",
+  "features": [
+    "hour",
+    "dayofweek",
+    "month",
+    "is_weekend",
+    "is_holiday",
+    "hour_sin",
+    "hour_cos",
+    "month_sin",
+    "month_cos",
+    "lag_1",
+    "lag_2",
+    "lag_3",
+    "lag_6",
+    "lag_12",
+    "lag_24",
+    "lag_48",
+    "lag_168",
+    "roll_mean_3",
+    "roll_std_3",
+    "roll_mean_6",
+    "roll_std_6",
+    "roll_mean_24",
+    "roll_std_24",
+    "roll_mean_168",
+    "roll_std_168",
+    "Global_reactive_power_lag1",
+    "Voltage_lag1",
+    "Global_intensity_lag1",
+    "Sub_metering_1_lag1",
+    "Sub_metering_2_lag1",
+    "Sub_metering_3_lag1"
+  ],
+  "train_period": [
+    "2006-12-23 17:00:00",
+    "2010-05-31 23:00:00"
+  ],
+  "test_period": [
+    "2010-06-01 00:00:00",
+    "2010-11-26 21:00:00"
+  ],
+  "test_metrics": {
+    "mae": 0.2934236884615469,
+    "rmse": 0.4319655679004869,
+    "r2": 0.6227160753609795,
+    "mape": 39.49231062570404
+  },
+  "baseline_test_metrics": {
+    "mae": 0.37725552916526794,
+    "rmse": 0.573542059946624,
+    "r2": 0.3348791003227234,
+    "mape": 46.87059783935547
+  },
+  "residual_std": 0.43180542437787106
+}

@@ -1,0 +1,46 @@
+# Central configuration for the Household Electricity Consumption Prediction pipeline.
+data:
+  url: "https://archive.ics.uci.edu/static/public/235/individual+household+electric+power+consumption.zip"
+  raw_zip: data/raw/household_power.zip
+  raw_txt: data/raw/household_power_consumption.txt
+  processed: data/processed/hourly.parquet
+  features: data/processed/features.parquet
+  serving: data/serving/recent_hourly.csv
+  web_data: public/data/dashboard.json
+  resample_rule: "1h"
+  max_interp_gap_hours: 6
+
+split:
+  # Chronological split: no shuffling, so no future data leaks into training.
+  train_end: "2009-12-31 23:00:00"
+  val_end: "2010-05-31 23:00:00"
+
+features:
+  target: Global_active_power
+  lags: [1, 2, 3, 6, 12, 24, 48, 168]
+  rolling_windows: [3, 6, 24, 168]
+
+models:
+  ridge:
+    alpha: 1.0
+  random_forest:
+    n_estimators: 200
+    max_depth: 16
+    min_samples_leaf: 5
+    n_jobs: -1
+    random_state: 42
+  hist_gradient_boosting:
+    max_iter: 500
+    learning_rate: 0.05
+    max_leaf_nodes: 31
+    l2_regularization: 1.0
+    random_state: 42
+
+mlflow:
+  tracking_uri: "sqlite:///mlflow.db"
+  experiment: household-electricity-forecasting
+  registered_model: household-power-forecaster
+
+monitoring:
+  psi_threshold: 0.2
+  mae_degradation_pct: 20

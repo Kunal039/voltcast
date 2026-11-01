@@ -1,0 +1,9 @@
+# Runtime dependencies of the prediction service (what Vercel / Docker serving installs).
+# scikit-learn is pinned to the version the model was trained with, so the pickled model loads safely.
+scikit-learn==1.9.1
+numpy>=2.0
+pandas>=2.2
+joblib>=1.4
+pyyaml>=6
+fastapi>=0.110
+pydantic>=2.6

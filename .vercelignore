@@ -1,0 +1,23 @@
+# Keep the serverless bundle small: only the API code, model, config and web assets are needed.
+data/raw/
+data/processed/
+mlruns/
+mlflow.db
+report/
+reports/
+dashboard/
+tests/
+.github/
+.claude/
+.streamlit/
+Dockerfile
+docker-compose.yml
+dvc.yaml
+run_pipeline.py
+requirements-dev.txt
+src/train.py
+src/evaluate.py
+src/monitor.py
+src/preprocess.py
+src/data_ingestion.py
+src/export_web.py

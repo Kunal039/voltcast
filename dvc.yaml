@@ -1,0 +1,35 @@
+# Reproducible pipeline definition (run with `dvc repro`), mirrors run_pipeline.py.
+stages:
+  ingest:
+    cmd: python -m src.data_ingestion
+    deps: [src/data_ingestion.py]
+    params: [configs/params.yaml:data]
+    outs: [data/raw/household_power_consumption.txt]
+  preprocess:
+    cmd: python -m src.preprocess
+    deps: [src/preprocess.py, data/raw/household_power_consumption.txt]
+    outs: [data/processed/hourly.parquet]
+    metrics: [reports/data_stats.json: {cache: false}]
+  features:
+    cmd: python -m src.features
+    deps: [src/features.py, data/processed/hourly.parquet]
+    params: [configs/params.yaml:features]
+    outs: [data/processed/features.parquet]
+  train:
+    cmd: python -m src.train
+    deps: [src/train.py, data/processed/features.parquet]
+    params: [configs/params.yaml:split, configs/params.yaml:models]
+    outs: [models/model.joblib, models/metadata.json]
+    metrics: [reports/metrics.json: {cache: false}]
+  monitor:
+    cmd: python -m src.monitor
+    deps: [src/monitor.py, models/model.joblib]
+    metrics: [reports/monitoring.json: {cache: false}]
+  evaluate:
+    cmd: python -m src.evaluate
+    deps: [src/evaluate.py, models/model.joblib, reports/monitoring.json]
+    plots: [reports/figures]
+  export_web:
+    cmd: python -m src.export_web
+    deps: [src/export_web.py, models/model.joblib, reports/monitoring.json]
+    outs: [data/serving/recent_hourly.csv: {cache: false}, public/data/dashboard.json: {cache: false}]

@@ -1,0 +1,19 @@
+{
+  "psi": {
+    "lag_1": 0.1891,
+    "roll_mean_24": 0.2895,
+    "Voltage_lag1": 0.1685,
+    "Global_intensity_lag1": 0.1998,
+    "Sub_metering_3_lag1": 0.7285,
+    "hour": 0.0,
+    "target": 0.1891
+  },
+  "drifted_features": [
+    "roll_mean_24",
+    "Sub_metering_3_lag1"
+  ],
+  "recent_30d_mae": 0.3497,
+  "reference_test_mae": 0.2934,
+  "mae_degradation_pct": 19.17,
+  "retraining_recommended": true
+}

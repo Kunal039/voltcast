@@ -1,0 +1,10 @@
+__pycache__/
+.pytest_cache/
+*.pyc
+.vercel/
+data/raw/
+data/processed/
+mlruns/
+mlflow.db
+report/~$*
+.claude/
