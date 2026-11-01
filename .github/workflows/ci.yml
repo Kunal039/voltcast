@@ -1,0 +1,41 @@
+name: CI / CT pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "0 2 * * 1"   # weekly continuous-training run
+  workflow_dispatch:
+
+jobs:
+  train-test-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      - name: Run full pipeline (ingest -> train -> monitor -> evaluate -> export)
+        run: python run_pipeline.py
+      - name: Quality gate - model must beat persistence baseline
+        run: |
+          python -c "import json,sys; m=json.load(open('models/metadata.json')); \
+          sys.exit(0 if m['test_metrics']['mae'] < m['baseline_test_metrics']['mae'] else 1)"
+      - name: Unit and API tests
+        run: pytest -q
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Build React web app (into public/, used by Docker and Vercel)
+        run: cd web && npm ci && npm run build
+      - name: Build Docker image
+        run: docker build -t household-power-api:${{ github.sha }} .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: model-and-reports
+          path: |
+            models/
+            reports/
