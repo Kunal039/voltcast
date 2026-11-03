@@ -1,15 +1,11 @@
-PS D:\01 Projects\VoltCast> npx --yes vercel ls voltcast 2>&1 | Select-Object -First 16
-node.exe : <claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" />
-At line:1 char:1
-+ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
-+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (<claude-code-hi...ns-official" />:String) [], RemoteException
-    + FullyQualifiedErrorId : NativeCommandError
- 
+PS D:\01 Projects\VoltCast> npx --yes vercel ls voltcast 2>&1 | Where-Object { $_ -notmatch 'hint|CategoryInfo|FullyQualified|At line|~~~|^\s*\+|^node.exe' } | Select-Object -First 16
 Vercel CLI 65.10.0
-> Deployments for kunal039s-projects/voltcast [342ms]
+> Deployments for kunal039s-projects/voltcast [346ms]
   Age     Project                                                             Deployment                               
                                      Status      Environment     Duration     Username     
+  4h      kunal039s-projects/voltcast                                         
+https://voltcast-kwev72ygy-kunal039s-projects.vercel.app                      ● Ready     Production      44s        
+  kunal039     
   2d      kunal039s-projects/voltcast                                         
 https://voltcast-dwlq12epr-kunal039s-projects.vercel.app                      ● Ready     Production      37s        
   kunal039     

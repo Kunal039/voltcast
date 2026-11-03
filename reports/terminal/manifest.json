@@ -202,13 +202,13 @@
     "lines": 20
   },
   "vercel_ls": {
-    "command": "npx --yes vercel ls voltcast 2>&1 | Select-Object -First 16",
-    "time": "2026-11-03 11:54:31",
-    "seconds": 28.3,
+    "command": "npx --yes vercel ls voltcast 2>&1 | Where-Object { $_ -notmatch 'hint|CategoryInfo|FullyQualified|At line|~~~|^\\s*\\+|^node.exe' } | Select-Object -First 16",
+    "time": "2026-11-03 16:05:44",
+    "seconds": 9.2,
     "images": [
       "vercel_ls.png"
     ],
-    "lines": 44
+    "lines": 40
   },
   "live_site": {
     "command": "curl.exe -s https://voltcast-forecast.vercel.app/api/health; ''; curl.exe -s -o NUL -w 'web app: HTTP %{http_code}, %{size_download} bytes' https://voltcast-forecast.vercel.app/",

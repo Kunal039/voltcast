@@ -116,7 +116,7 @@ STEPS = [
     ("grafana_api", "curl.exe -s 'http://localhost:3000/api/search?query=VoltCast' | python -m json.tool; curl.exe -s http://localhost:3000/api/datasources | python -m json.tool"),
     ("ci_runs", "gh run list --limit 8"),
     ("ci_run_view", "gh run view (gh run list --limit 1 --json databaseId --jq '.[0].databaseId')"),
-    ("vercel_ls", "npx --yes vercel ls voltcast 2>&1 | Select-Object -First 16"),
+    ("vercel_ls", r"npx --yes vercel ls voltcast 2>&1 | Where-Object { $_ -notmatch 'hint|CategoryInfo|FullyQualified|At line|~~~|^\s*\+|^node.exe' } | Select-Object -First 16"),
     ("live_site", "curl.exe -s https://voltcast-forecast.vercel.app/api/health; ''; curl.exe -s -o NUL -w 'web app: HTTP %{http_code}, %{size_download} bytes' https://voltcast-forecast.vercel.app/"),
     ("k8s_validate", "python -c \"import yaml; docs=list(yaml.safe_load_all(open('k8s/deployment.yaml'))); [print(d['kind'], d['metadata']['name']) for d in docs]\"; docker compose config -q; 'docker compose config: OK'"),
 ]
