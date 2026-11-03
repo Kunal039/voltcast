@@ -1,0 +1,5 @@
+PS D:\01 Projects\VoltCast> curl.exe -s -w '  -> HTTP %{http_code}' 'http://localhost:8000/api/forecast?origin=2010-10-01T08:00&horizon=99'; ''; curl.exe -s -w '  -> HTTP %{http_code}' -X POST -H 'Content-Type: application/json' -d '{\"history\": [], \"horizon\": 5}' http://localhost:8000/api/predict
+{"error":"horizon must be between 1 and 48"}
+  -> HTTP 422
+{"error":"history must contain at least 169 hourly readings"}
+  -> HTTP 422

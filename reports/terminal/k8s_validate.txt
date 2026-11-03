@@ -1,0 +1,5 @@
+PS D:\01 Projects\VoltCast> python -c "import yaml; docs=list(yaml.safe_load_all(open('k8s/deployment.yaml'))); [print(d['kind'], d['metadata']['name']) for d in docs]"; docker compose config -q; 'docker compose config: OK'
+Deployment voltcast-api
+Service voltcast-api
+HorizontalPodAutoscaler voltcast-api
+docker compose config: OK

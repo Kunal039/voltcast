@@ -1,0 +1,13 @@
+PS D:\01 Projects\VoltCast> python --version; pip list 2>$null | Select-String -Pattern '^(scikit-learn|pandas|numpy|mlflow|dvc|Flask|prometheus.client|pydantic|pytest|streamlit) '
+Python 3.14.7
+
+dvc                                3.67.1
+Flask                              3.1.3
+mlflow                             3.17.2
+numpy                              2.5.4
+pandas                             3.0.6
+prometheus_client                  0.26.0
+pydantic                           2.14.2
+pytest                             9.1.1
+scikit-learn                       1.9.1
+streamlit                          1.66.1

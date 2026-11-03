@@ -1,0 +1,21 @@
+PS D:\01 Projects\VoltCast> python -m pytest -v
+============================= test session starts =============================
+platform win32 -- Python 3.14.7, pytest-9.1.1, pluggy-1.7.0 -- C:\Python314\python.exe
+cachedir: .pytest_cache
+rootdir: D:\01 Projects\VoltCast
+plugins: anyio-4.16.0, hydra-core-1.3.8, platformdirs-4.13.5, cov-7.1.0
+collecting ... collected 11 items
+
+tests/test_pipeline.py::test_resample_fills_gaps PASSED                  [  9%]
+tests/test_pipeline.py::test_features_have_no_leakage PASSED             [ 18%]
+tests/test_pipeline.py::test_metrics_perfect_prediction PASSED           [ 27%]
+tests/test_pipeline.py::test_psi_detects_shift PASSED                    [ 36%]
+tests/test_pipeline.py::test_classification_scores PASSED                [ 45%]
+tests/test_pipeline.py::test_health_endpoint PASSED                      [ 54%]
+tests/test_pipeline.py::test_predict_endpoint_returns_horizon PASSED     [ 63%]
+tests/test_pipeline.py::test_predict_rejects_short_history PASSED        [ 72%]
+tests/test_pipeline.py::test_predict_rejects_invalid_reading PASSED      [ 81%]
+tests/test_pipeline.py::test_prometheus_metrics_exposed PASSED           [ 90%]
+tests/test_pipeline.py::test_model_beats_baseline PASSED                 [100%]
+
+============================= 11 passed in 3.08s ==============================

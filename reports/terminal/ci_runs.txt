@@ -1,0 +1,6 @@
+PS D:\01 Projects\VoltCast> gh run list --limit 8
+completed	success	CI / CT pipeline	CI / CT pipeline	main	schedule	41416478496	12m37s	2026-11-02T08:54:36Z
+completed	success	Align VoltCast with the MLOps-1 (25CSH-320) syllabus	CI / CT pipeline	main	push	41335396264	12m47s	2026-11-01T18:12:22Z
+completed	success	Store the dataset as a single CSV instead of the raw UCI archive	CI / CT pipeline	main	push	41331109212	2m28s	2026-11-01T17:22:04Z
+completed	success	Rename project to VoltCast	CI / CT pipeline	main	push	41329483057	2m37s	2026-11-01T17:03:34Z
+completed	success	Add CI/CT workflow: pipeline, quality gate, tests, React build, Docke…	CI / CT pipeline	main	push	41328065114	3m12s	2026-11-01T16:46:51Z

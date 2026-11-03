@@ -1,0 +1,45 @@
+PS D:\01 Projects\VoltCast> npx --yes vercel ls voltcast 2>&1 | Select-Object -First 16
+node.exe : <claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" />
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (<claude-code-hi...ns-official" />:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Vercel CLI 65.10.0
+> Deployments for kunal039s-projects/voltcast [342ms]
+  Age     Project                                                             Deployment                               
+                                     Status      Environment     Duration     Username     
+  2d      kunal039s-projects/voltcast                                         
+https://voltcast-dwlq12epr-kunal039s-projects.vercel.app                      ● Ready     Production      37s        
+  kunal039     
+  2d      kunal039s-projects/voltcast                                         
+https://voltcast-m18wc1qsc-kunal039s-projects.vercel.app                      ● Ready     Preview         35s        
+  kunal039     
+  2d      kunal039s-projects/voltcast                                         
+https://voltcast-6idkr5w02-kunal039s-projects.vercel.app                      ● Ready     Preview         39s        
+  kunal039     
+  2d      kunal039s-projects/voltcast                                         
+https://voltcast-axmimqpuk-kunal039s-projects.vercel.app                      ● Ready     Production      39s        
+  kunal039     
+  2d      kunal039s-projects/voltcast                                         
+https://voltcast-18yuf2ne8-kunal039s-projects.vercel.app                      ● Ready     Production      39s        
+  kunal039     
+  2d      kunal039s-projects/household-electricity-consumption-prediction     
+https://household-electricity-consumption-prediction-6136x5rql.vercel.app     ● Ready     Production      37s        
+  kunal039     
+  2d      kunal039s-projects/household-electricity-consumption-prediction     
+https://household-electricity-consumption-prediction-3nu2utj0w.vercel.app     ● Ready     Production      37s        
+  kunal039     
+  2d      kunal039s-projects/household-electricity-consumption-prediction     
+https://household-electricity-consumption-prediction-bc05tvews.vercel.app     ● Ready     Production      38s        
+  kunal039     
+  2d      kunal039s-projects/household-electricity-consumption-prediction     
+https://household-electricity-consumption-prediction-bgqebpu2d.vercel.app     ● Ready     Production      51s        
+  kunal039     
+  2d      kunal039s-projects/household-electricity-consumption-prediction     
+https://household-electricity-consumption-prediction-ohg3y3s6j.vercel.app     ● Ready     Preview         50s        
+  kunal039     
+  2d      kunal039s-projects/household-electricity-consumption-prediction     
+https://household-electricity-consumption-prediction-eti1swnly.vercel.app     ● Ready     Production      28s        
+  kunal039

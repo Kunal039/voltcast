@@ -49,3 +49,10 @@ stages:
     outs:
       - data/serving/recent_hourly.csv: {cache: false}
       - web/public/data/dashboard.json: {cache: false}
+  analyze:
+    cmd: python -m src.analysis
+    deps: [src/analysis.py, src/train.py, data/processed/features.parquet, models/model.joblib,
+           models/peak_classifier.json, reports/metrics.json, data/serving/recent_hourly.csv]
+    params: [{configs/params.yaml: [split, models, tuning, classification]}]
+    outs: [reports/analysis: {cache: false}]
+    metrics: [reports/analysis.json: {cache: false}]

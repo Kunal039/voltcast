@@ -1,0 +1,19 @@
+PS D:\01 Projects\VoltCast> docker compose up -d --build 2>&1 | Select-Object -Last 12; docker compose ps
+NAME                    IMAGE                     COMMAND                  SERVICE      CREATED         STATUS                                     PORTS
+voltcast-api-1          voltcast:latest           "gunicorn --workers …"   api          2 seconds ago   Up 1 second (health: starting)             0.0.0.0:8000->8000/tcp, [::]:8000->8000/tcp
+voltcast-dashboard-1    voltcast:latest           "streamlit run dashb…"   dashboard    2 seconds ago   Up Less than a second (health: starting)   0.0.0.0:8501->8501/tcp, [::]:8501->8501/tcp
+voltcast-grafana-1      grafana/grafana:11.2.0    "/run.sh"                grafana      2 seconds ago   Up Less than a second                      0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp
+voltcast-mlflow-1       voltcast:latest           "mlflow ui --backend…"   mlflow       2 seconds ago   Up Less than a second (health: starting)   0.0.0.0:5000->5000/tcp, [::]:5000->5000/tcp
+voltcast-prometheus-1   prom/prometheus:v2.53.2   "/bin/prometheus --c…"   prometheus   2 seconds ago   Up Less than a second                      0.0.0.0:9090->9090/tcp, [::]:9090->9090/tcp
+ Container voltcast-mlflow-1 Created 
+ Container voltcast-grafana-1 Created 
+ Container voltcast-api-1 Starting 
+ Container voltcast-api-1 Started 
+ Container voltcast-prometheus-1 Starting 
+ Container voltcast-dashboard-1 Starting 
+ Container voltcast-mlflow-1 Starting 
+ Container voltcast-prometheus-1 Started 
+ Container voltcast-grafana-1 Starting 
+ Container voltcast-dashboard-1 Started 
+ Container voltcast-mlflow-1 Started 
+ Container voltcast-grafana-1 Started

@@ -1,0 +1,4 @@
+PS D:\01 Projects\VoltCast> curl.exe -s https://voltcast-forecast.vercel.app/api/health; ''; curl.exe -s -o NUL -w 'web app: HTTP %{http_code}, %{size_download} bytes' https://voltcast-forecast.vercel.app/
+{"model":"hist_gradient_boosting","status":"ok","trained_at":"2026-11-01T17:49:31+00:00"}
+
+web app: HTTP 200, 927 bytes

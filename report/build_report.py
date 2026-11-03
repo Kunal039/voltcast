@@ -32,6 +32,10 @@ imp = pd.read_csv(ROOT / "reports" / "feature_importance.csv", index_col=0)["imp
 V, T, B = metrics["validation"], meta["test_metrics"], meta["baseline_test_metrics"]
 MAE_GAIN = (1 - T["mae"] / B["mae"]) * 100
 RMSE_GAIN = (1 - T["rmse"] / B["rmse"]) * 100
+AN = json.loads((ROOT / "reports" / "analysis.json").read_text())
+AFIG = ROOT / "reports" / "analysis"
+TERM = ROOT / "reports" / "terminal"
+TERM_MANIFEST = json.loads((TERM / "manifest.json").read_text()) if (TERM / "manifest.json").exists() else {}
 
 doc = Document()
 fig_no = {"ch": 0, "fig": 0, "tab": 0}
@@ -132,6 +136,7 @@ def caption(kind, text):
     p = doc.add_paragraph(style="Caption")
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p.paragraph_format.space_after = Pt(10)
+    p.paragraph_format.keep_with_next = kind == "Table"  # a table caption stays on the table's page
     set_font(p.add_run(f"{kind} {fig_no['ch']}."), 11, bold=True)
     # \r pins the number so unnumbered Heading 1 sections don't reset it; the field keeps lists working.
     field(p, f"SEQ {kind} \\r {fig_no[key]} \\* ARABIC", 11, str(fig_no[key]))
@@ -150,11 +155,17 @@ def table(header, rows, text, widths=None):
     caption("Table", text)
     t = doc.add_table(rows=1, cols=len(header))
     t.style = "Table Grid"
+    # Repeat the header row on every page the table spans, and keep it with the first data row.
+    trPr = t.rows[0]._tr.get_or_add_trPr()
+    hdr = OxmlElement("w:tblHeader")
+    hdr.set(qn("w:val"), "true")
+    trPr.append(hdr)
     t.alignment = WD_TABLE_ALIGNMENT.CENTER
     for i, h in enumerate(header):
         c = t.rows[0].cells[i]
         c.text = ""
         set_font(c.paragraphs[0].add_run(str(h)), 10.5, bold=True)
+        c.paragraphs[0].paragraph_format.keep_with_next = True
         shd = OxmlElement("w:shd")
         shd.set(qn("w:val"), "clear")
         shd.set(qn("w:fill"), "D9E2F3")
@@ -169,6 +180,42 @@ def table(header, rows, text, widths=None):
             for i, w in enumerate(widths):
                 row.cells[i].width = Cm(w)
     para(after=4)
+
+
+def shade(paragraph, fill="F2F2F2"):
+    pPr = paragraph._p.get_or_add_pPr()
+    shd = OxmlElement("w:shd")
+    shd.set(qn("w:val"), "clear")
+    shd.set(qn("w:fill"), fill)
+    pPr.append(shd)
+
+
+def code_listing(rel_path: str, title: str) -> None:
+    """Full source of one project file, with line numbers, in a shaded monospace block."""
+    heading(f"{rel_path}: {title}", 3)
+    lines = (ROOT / rel_path).read_text(encoding="utf-8").rstrip("\n").split("\n")
+    for i, line in enumerate(lines, 1):
+        p = doc.add_paragraph()
+        pf = p.paragraph_format
+        pf.space_before = pf.space_after = Pt(0)
+        pf.line_spacing = 1.0
+        shade(p)
+        r = p.add_run(f"{i:4d}  {line}")
+        r.font.name = "Consolas"
+        r._element.rPr.rFonts.set(qn("w:eastAsia"), "Consolas")
+        r.font.size = Pt(7.5)
+    para(after=6)
+
+
+def terminal(name: str, text: str, width: float = 16) -> None:
+    """Terminal evidence: every image of a captured command (see report/capture_terminal.py)."""
+    info = TERM_MANIFEST.get(name)
+    if not info:
+        return
+    imgs = info["images"]
+    for k, img in enumerate(imgs, 1):
+        part = f" (part {k} of {len(imgs)})" if len(imgs) > 1 else ""
+        figure(TERM / img, f"{text}{part}, run {info['time']}", width)
 
 
 # ---------- document-wide setup ----------
@@ -271,6 +318,7 @@ LBL = {"persistence_baseline": "Persistence baseline", "seasonal_naive_24h": "Se
        "random_forest": "Random forest", "hist_gradient_boosting": "Histogram gradient boosting"}
 nf = lambda k=1: f"{fig_no['ch']}.{fig_no['fig'] + k}"   # number the next figure will get
 nt = lambda k=1: f"{fig_no['ch']}.{fig_no['tab'] + k}"   # number the next table will get
+CANDIDATES_ORDER = list(V)
 DT = TUN["decision_tree"]
 OUT_GAP = stats["outliers"]["Global_active_power"]
 
@@ -444,6 +492,55 @@ para("**MLOps platforms.** Kreuzberger et al. describe the components of a produ
      "Ameisen frames the same lifecycle from a product perspective, from prototype to monitored "
      "deployment [23]. MLflow [14], DVC and drift-detection methods [19] are widely used building blocks.")
 
+para("The following paragraphs summarise the theory of every algorithm used in this project, following the "
+     "course textbooks [21]–[23]. Throughout, xₜ is the feature vector of hour t and yₜ the consumption to predict.")
+para("**Linear regression.** Models ŷ = w·x + b and chooses w, b to minimise the sum of squared errors "
+     "Σ(yₜ − ŷₜ)² (ordinary least squares). It is fast and interpretable, since each weight is the change in "
+     "consumption per unit of a feature, but it can only represent linear relationships, so interactions such as "
+     "“evening AND winter” must be engineered by hand. Inputs are standardised so the weights are comparable.")
+para("**Ridge regression (regularisation).** Adds a penalty α·Σw² to the least-squares loss. Large α shrinks the "
+     "weights towards zero, which reduces variance and the effect of correlated features (the lag and rolling "
+     "features here are strongly correlated) at the cost of some bias. α is chosen by cross-validation.")
+para("**Decision tree.** Recursively splits the data on the feature and threshold that most reduce the "
+     "mean squared error of the target in the two child nodes (the CART algorithm); a leaf predicts the mean of its "
+     "training rows. Trees capture non-linear rules and need no scaling, but an unrestricted tree keeps splitting "
+     "until every leaf is pure and memorises noise. max_depth and min_samples_leaf limit this and act as "
+     "regularisation. For classification, splits minimise Gini impurity instead.")
+para("**K-nearest neighbours (KNN).** Predicts the average target of the k training rows closest to the new row "
+     "in Euclidean distance (optionally weighted by 1/distance). It makes no assumptions about the shape of the "
+     "relationship, but it is sensitive to feature scale (so inputs are standardised), slow to predict on large "
+     "data, and small k over-fits while large k under-fits.")
+para("**Support vector machine for regression (SVR).** Fits a function that stays within ε of as many targets as "
+     "possible while keeping the model as flat as possible; only points outside the ε-tube (support vectors) "
+     "influence it. The RBF kernel lets it learn non-linear functions. C trades flatness against errors outside "
+     "the tube. Training cost grows roughly quadratically with the number of rows, which is why SVR is the slowest "
+     "model here.")
+para("**Random forest.** Averages many decision trees, each grown on a bootstrap sample of the rows and choosing "
+     "each split from a random subset of features (bagging) [8]. Averaging de-correlated trees reduces variance "
+     "sharply, so the forest generalises far better than a single tree while keeping its non-linearity.")
+para("**Gradient boosting.** Builds trees sequentially; each new tree is fitted to the residual errors (the "
+     "negative gradient of the loss) of the current ensemble, and its prediction is added with a small learning "
+     "rate η [9]. The histogram variant bins each feature into at most 255 values, which makes split finding very "
+     "fast on tens of thousands of rows [18]. Boosting reduces bias step by step, while the learning rate, number of "
+     "leaves and L2 penalty control over-fitting.")
+para("**Logistic regression.** For the peak-hour classifier, models the probability of the positive class as "
+     "σ(w·x + b), where σ is the sigmoid function, and is fitted by maximising the log-likelihood. It serves as the "
+     "linear reference for the decision-tree classifier.")
+para("**Model evaluation.** Because the data is a time series, ordinary k-fold cross-validation would train on "
+     "the future and test on the past. TimeSeriesSplit instead creates expanding windows: fold 1 trains on the "
+     "first sixth of the training period and validates on the next sixth, fold 5 trains on five sixths and "
+     "validates on the last. GridSearchCV evaluates every hyper-parameter combination on these folds and keeps "
+     "the one with the best mean score [21], [22].")
+para("**MLOps building blocks.** Version control (Git) tracks code; data and pipeline versioning (DVC) "
+     "tracks datasets, parameters and outputs by content hash, so any result can be reproduced from a commit. "
+     "Experiment tracking and model registry (MLflow) records every run's parameters, metrics and model "
+     "artifacts and numbers model versions. Containerisation (Docker) packages the code with its exact "
+     "dependencies, and orchestration (Docker Compose, Kubernetes) runs and scales several containers as "
+     "microservices. CI/CD (GitHub Actions, Vercel) automatically tests, builds and deploys on every change; "
+     "continuous training re-runs the pipeline on a schedule. Monitoring (Prometheus collects time-series "
+     "metrics by scraping HTTP endpoints; Grafana visualises them) and drift detection close the loop by "
+     "telling the team when the model needs retraining [5], [23].")
+
 heading("2.3. Bibliometric analysis", 2)
 table(["Work", "Approach", "Key features", "Effectiveness", "Drawbacks"], [
     ["Box & Jenkins [6]", "ARIMA", "Linear autoregression, differencing", "Good for aggregate, smooth loads",
@@ -526,6 +623,24 @@ figure(FIG / "fig_eda_heatmap.png", "Average consumption by weekday and hour (mo
 figure(FIG / "fig_eda_month_submeter.png", "Monthly pattern and share of energy per sub-meter")
 para("The EDA shows a strong winter peak (consumption roughly doubles from August to December), two daily "
      "peaks around 07:00 and 20:00–21:00, higher daytime use at weekends, and an August holiday dip.")
+para(f"Figures {nf()}–{nf(7)} extend the analysis. Missing readings are concentrated in a few months, the worst "
+     f"being {AN['eda']['missing_pct_by_month_max']['month'][:7]} with {AN['eda']['missing_pct_by_month_max']['pct']}% "
+     "missing (long outages), which justified the two-step gap filling below. All variables are right-skewed, "
+     "with many low-consumption hours and a long tail of peaks. The autocorrelation of hourly consumption is "
+     f"{AN['eda']['autocorr']['lag_1']} at one hour, with repeating peaks every 24 hours "
+     f"({AN['eda']['autocorr']['lag_24']} at 24 h, {AN['eda']['autocorr']['lag_168']} at one week), which "
+     "is why the lag features at 1, 24 and 168 hours were chosen.")
+figure(AFIG / "missing_by_month.png", "Share of missing one-minute readings per month")
+figure(AFIG / "distributions.png", "Distribution of each hourly variable", 15.5)
+figure(AFIG / "autocorrelation.png", "Autocorrelation of hourly consumption up to eight days")
+figure(AFIG / "weekly_profile.png", "Average weekly load profile")
+figure(AFIG / "submeter_by_hour.png", "Average energy by sub-meter and hour of day")
+figure(AFIG / "monthly_boxplot.png", "Hourly consumption by month (box plots)")
+figure(AFIG / "year_over_year.png", "Monthly average consumption, year by year")
+desc = AN["eda"]["describe"]
+table(["Variable", "Mean", "Std", "Min", "25%", "Median", "75%", "Max"],
+      [[c.replace("_", " "), *[f"{desc[c][k]:.3f}" for k in ["mean", "std", "min", "25%", "50%", "75%", "max"]]]
+       for c in desc], "Descriptive statistics of the hourly data", [4.2, 1.5, 1.5, 1.5, 1.5, 1.6, 1.5, 1.5])
 para(f"**Outliers.** With the inter-quartile-range rule (outside Q1 − 1.5·IQR … Q3 + 1.5·IQR), "
      f"{OUT_GAP['count']} hourly values of active power ({OUT_GAP['pct']}%) lie above {OUT_GAP['upper']} kW "
      f"(Figure {nf()}). These are genuine peak-usage hours (heaters, ovens), exactly the hours the forecaster "
@@ -619,6 +734,23 @@ heading("3.6. Implementation plan/methodology", 2)
 para(f"Figure {nf()} shows the algorithm executed by the pipeline and Figure {nf(2)} the detailed block diagram.")
 figure(DIAG / "fig_flowchart.png", "Flowchart of the training and deployment algorithm", 10)
 figure(DIAG / "fig_architecture.png", "Detailed block diagram of the MLOps architecture")
+para(f"The system is further described by a context data-flow diagram (Figure {nf()}), a level-1 data-flow "
+     f"diagram showing processes and data stores (Figure {nf(2)}), a use-case diagram (Figure {nf(3)}), a "
+     f"sequence diagram of a forecast request (Figure {nf(4)}), the deployment diagram (Figure {nf(5)}), the "
+     f"CI/CD pipeline (Figure {nf(6)}) and the DVC stage graph (Figure {nf(7)}).")
+figure(DIAG / "dfd_level0.png", "Data-flow diagram, level 0 (context)", 15)
+figure(DIAG / "dfd_level1.png", "Data-flow diagram, level 1", 15.5)
+figure(DIAG / "use_case.png", "Use-case diagram", 14)
+figure(DIAG / "sequence_forecast.png", "Sequence diagram: serving a forecast request", 15.5)
+figure(DIAG / "deployment.png", "Deployment diagram: Docker Compose, Vercel and Kubernetes", 15.5)
+figure(DIAG / "cicd.png", "CI/CD pipeline", 15.5)
+figure(DIAG / "dvc_dag.png", "DVC pipeline graph", 15)
+para(f"Each pipeline stage follows its own algorithm, shown as flowcharts in Figures {nf()}–{nf(5)}.")
+figure(DIAG / "flow_preprocess.png", "Flowchart of the preprocessing stage", 10)
+figure(DIAG / "flow_training.png", "Flowchart of the training and tuning stage", 10.5)
+figure(DIAG / "flow_classifier.png", "Flowchart of the peak-hour classifier stage", 10)
+figure(DIAG / "flow_prediction.png", "Flowchart of serving a prediction", 11.5)
+figure(DIAG / "flow_monitoring.png", "Flowchart of drift monitoring and the retraining decision", 11.5)
 para("**Data split.** To respect time ordering, data is split chronologically: training up to 31 Dec 2009 "
      f"(26,503 h), validation Jan–May 2010 (3,624 h) and test {meta['test_period'][0][:10]} to "
      f"{meta['test_period'][1][:10]} (4,294 h). Models are selected on validation, refit on "
@@ -706,6 +838,14 @@ para(f"Figure {nf()} compares training and validation error. The default decisio
      "shallow trees under-fit, deep trees over-fit, and the best depth lies in between.")
 figure(FIG / "fig_train_vs_val.png", "Training vs validation MAE of each model (default hyper-parameters)")
 figure(FIG / "fig_validation_curve.png", "Validation curve of the decision tree: error against max_depth")
+lc = AN["learning_curves"]
+para(f"Learning curves (Figure {nf()}) show how training and cross-validation error change as the models see more "
+     "history. For linear regression both curves meet quickly at a high error, the signature of under-fitting "
+     "(more data does not help). The unrestricted decision tree keeps a near-zero training error and a large gap, "
+     "the signature of over-fitting. Random forest and gradient boosting narrow the gap as data grows "
+     f"(gradient boosting CV MAE {lc['hist_gradient_boosting']['cv_mae'][0]:.3f} → "
+     f"{lc['hist_gradient_boosting']['cv_mae'][-1]:.3f} kW), so more historical data would still help them.")
+figure(AFIG / "learning_curves.png", "Learning curves with time-series cross-validation", 16)
 
 heading("4.1.4. Hyper-parameter tuning with GridSearchCV", 3)
 para(f"Table {nt()} lists the GridSearchCV results (five time-series folds on the training period).")
@@ -714,6 +854,21 @@ table(["Model", "Best parameters", "Grid size", "CV MAE", "Val MAE default", "Va
         f"{t['cv_mae']:.3f}", f"{t['default_val']['mae']:.3f}", f"{t['tuned_val']['mae']:.3f}"] for n, t in TUN.items()],
       "Hyper-parameter tuning results", [3.6, 4.6, 1.4, 1.6, 1.9, 1.9])
 figure(FIG / "fig_tuning.png", "Validation MAE before and after GridSearchCV tuning")
+hp = AN["hyperparameters"]
+para(f"Figure {nf()} shows how the error responds to individual hyper-parameters. The decision-tree heat map "
+     "covers the whole GridSearchCV grid: deep trees with tiny leaves are worst, and a large minimum leaf size makes "
+     f"depth almost irrelevant. KNN improves steadily from k = 1 (validation MAE {hp['knn_k']['val_mae'][0]:.3f}) to "
+     f"k = 80 ({hp['knn_k']['val_mae'][-1]:.3f}). Ridge is flat until α becomes very large, when strong "
+     "regularisation starts to under-fit.")
+figure(AFIG / "hyperparameter_curves.png", "Hyper-parameter response: decision-tree grid, KNN neighbours, ridge alpha", 16)
+cvf = AN["cv_folds"]
+para(f"Table {nt()} and Figure {nf()} give the error in each time-series fold for the tuned models. Every model is "
+     "worse in fold 2, whose validation window is a winter period with high, variable consumption, and the ranking "
+     "of models is consistent across folds, which supports the model choice.")
+table(["Model", "Fold 1", "Fold 2", "Fold 3", "Fold 4", "Fold 5", "Mean", "Std"],
+      [[LBL[n], *[f"{v:.3f}" for v in f], f"{sum(f) / len(f):.3f}", f"{pd.Series(f).std():.3f}"] for n, f in cvf.items()],
+      "Cross-validation MAE (kW) per time-series fold, tuned models", [4.4, 1.4, 1.4, 1.4, 1.4, 1.4, 1.4, 1.3])
+figure(AFIG / "cv_folds.png", "MAE in each time-series cross-validation fold")
 para(f"Tuning helps most where the default was poorly regularised: the decision tree improves from "
      f"{DT['default_val']['mae']:.3f} to {DT['tuned_val']['mae']:.3f} kW once depth and minimum leaf size are "
      f"limited. KNN gains by averaging over more neighbours with distance weighting; ridge prefers strong "
@@ -731,6 +886,37 @@ table(["Model", "MAE (kW)", "MSE", "RMSE (kW)", "R²", "MAPE (%)"], [
     ["Improvement", f"{MAE_GAIN:.1f}%", f"{(1 - T['mse'] / B['mse']) * 100:.1f}%", f"{RMSE_GAIN:.1f}%",
      f"+{T['r2'] - B['r2']:.3f}", "–"],
 ], "Held-out test performance (Jun–Nov 2010)", [5.0, 2.0, 2.0, 2.0, 2.0, 2.0])
+TA = AN["test_all_models"]
+para(f"To confirm that selecting on the validation window did not favour one model by chance, every model "
+     f"(default and tuned) was also refit on train+validation and scored on the test period. Tables {nt()} and "
+     f"{nt(2)} give the complete results; Figure {nf()} compares the main ones.")
+order = list(CANDIDATES_ORDER) + [n for n in TA if n.endswith("_tuned")]
+nm = lambda n: LBL[n.removesuffix("_tuned")] + (" (tuned)" if n.endswith("_tuned") else "")
+table(["Model", "MAE", "MSE", "RMSE", "R²", "MAPE %", "Median AE", "Max error"],
+      [[f"**{nm(n)}**" if n == meta["model_name"] else nm(n), *[f"{TA[n][k]:.3f}" for k in ["mae", "mse", "rmse", "r2"]],
+        f"{TA[n]['mape']:.1f}", f"{TA[n]['median_ae']:.3f}", f"{TA[n]['max_error']:.2f}"] for n in order],
+      "Test-set error metrics of every model (kW, kW²)", [5.0, 1.4, 1.4, 1.5, 1.4, 1.5, 1.7, 1.6])
+table(["Model", "Accuracy (1 − WAPE)", "Within ±0.25 kW", "Within ±0.5 kW", "Explained variance", "Fit (s)", "ms / prediction"],
+      [[f"**{nm(n)}**" if n == meta["model_name"] else nm(n), f"{TA[n]['accuracy_1_minus_wape'] * 100:.1f}%",
+        f"{TA[n]['within_0_25kw_pct']:.1f}%", f"{TA[n]['within_0_5kw_pct']:.1f}%", f"{TA[n]['explained_variance']:.3f}",
+        f"{TA[n]['fit_seconds']:.1f}", f"{TA[n]['predict_ms_per_row']:.4f}"] for n in order],
+      "Test-set accuracy-style metrics, training time and prediction time of every model",
+      [4.6, 2.2, 1.9, 1.9, 2.0, 1.3, 1.6])
+best_t = TA[meta["model_name"]]
+para(f"Accuracy-style metrics make the regression results easier to read. Accuracy as 1 − WAPE (weighted absolute "
+     f"percentage error) is the share of total consumption predicted correctly: "
+     f"{best_t['accuracy_1_minus_wape'] * 100:.1f}% for the deployed model against "
+     f"{TA['persistence_baseline']['accuracy_1_minus_wape'] * 100:.1f}% for persistence. "
+     f"{best_t['within_0_25kw_pct']:.1f}% of hourly forecasts are within ±0.25 kW of the actual value and "
+     f"{best_t['within_0_5kw_pct']:.1f}% within ±0.5 kW. Gradient boosting is also best on the test set, ahead of "
+     "random forest and SVM, and the tuned variants rank as on validation. This confirms the selection was not a "
+     "lucky choice.")
+figure(AFIG / "test_metrics_all_models.png", "Test MAE, RMSE, R² and accuracy (1 − WAPE) of every model", 16)
+para(f"Figures {nf()}–{nf(3)} show the behaviour of each model on the test set: a week of forecasts, the "
+     "predicted-vs-actual scatter, and the residual distribution.")
+figure(AFIG / "per_model_forecasts.png", "Forecasts of every model over the last seven days of the test set", 16)
+figure(AFIG / "per_model_scatter.png", "Predicted vs actual for every model (test set)", 16)
+figure(AFIG / "per_model_residuals.png", "Residual distribution of every model (test set)", 16)
 para(f"The forecasts follow the daily cycle and the timing of evening peaks closely (Figure {nf()}). Residuals are "
      f"centred near zero but right-skewed (Figure {nf(2)}): the largest errors are sudden short spikes, such as an "
      "oven or water heater switching on, which are inherently unpredictable from past meter data alone.")
@@ -742,6 +928,18 @@ para(f"**Explainability.** Permutation importance (Figure {nf()}) shows the inpu
      "sub-meter signals heavy thermal loads, and the hour encodings capture daily routines, which is physically "
      "consistent.")
 figure(FIG / "fig_feature_importance.png", "Top 15 features by permutation importance", 13)
+hz = AN["horizon"]
+para(f"**Error by forecast horizon.** The deployed service forecasts up to 48 hours ahead by feeding each "
+     f"prediction back as input (recursive forecasting). Figure {nf()} and Table {nt()} show the error for "
+     f"{hz['origins']} random starting points in the test period. Error grows from {hz['mae_by_hour'][0]:.3f} kW one "
+     f"hour ahead to {hz['mae_by_hour'][-1]:.3f} kW 24 hours ahead as uncertainty accumulates, but stays below the "
+     f"same-hour-yesterday baseline at every horizon ({hz['naive_mae_by_hour'][0]:.3f} kW). This is why the API "
+     "widens its prediction interval with √h.")
+figure(AFIG / "horizon_curve.png", "Forecast MAE by hours ahead, compared with the seasonal-naive baseline")
+table(["Hours ahead", *[str(h) for h in (1, 2, 3, 6, 12, 18, 24)]],
+      [["VoltCast MAE (kW)", *[f"{hz['mae_by_hour'][h - 1]:.3f}" for h in (1, 2, 3, 6, 12, 18, 24)]],
+       ["Seasonal naive MAE (kW)", *[f"{hz['naive_mae_by_hour'][h - 1]:.3f}" for h in (1, 2, 3, 6, 12, 18, 24)]]],
+      "Forecast error by horizon", [4.4, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5])
 
 heading("4.1.6. Peak-hour classification", 3)
 cv = clf["validation"]
@@ -759,6 +957,32 @@ para(f"The default decision tree again over-fits (training F1 {cv['decision_tree
      f"accuracy {CT['accuracy']:.3f}, precision {CT['precision']:.3f}, recall {CT['recall']:.3f}, F1 "
      f"{CT['f1']:.3f} and ROC-AUC {CT['roc_auc']:.3f} (Figure {nf()}).")
 figure(FIG / "fig_classification.png", "Peak-hour classifier on the test set: confusion matrix, ROC and precision-recall curves")
+CA = AN["classification"]["classifiers"]
+para(f"Figure {nf()} compares the confusion matrices of all three classifiers on the test set, and Figure "
+     f"{nf(2)} their ROC and precision-recall curves. Table {nt()} is the full classification report of each "
+     "classifier, giving precision, recall, F1 and support for both classes plus accuracy and the macro and "
+     "weighted averages.")
+figure(AFIG / "classifier_confusion_matrices.png", "Confusion matrices of the three classifiers (test set)", 16)
+figure(AFIG / "classifier_roc_pr.png", "ROC and precision-recall curves of the three classifiers (test set)", 16)
+rows = []
+for name, c in CA.items():
+    rep_ = c["report"]
+    for cls in ["Normal hour", "Peak hour", "macro avg", "weighted avg"]:
+        r_ = rep_[cls]
+        rows.append([name if cls == "Normal hour" else "", cls, f"{r_['precision']:.3f}", f"{r_['recall']:.3f}",
+                     f"{r_['f1-score']:.3f}", f"{int(r_['support'])}"])
+    rows.append(["", "accuracy", "", "", f"{rep_['accuracy']:.3f}", f"{int(rep_['macro avg']['support'])}"])
+table(["Classifier", "Class", "Precision", "Recall", "F1-score", "Support"], rows,
+      "Classification reports on the test set", [4.4, 3.0, 1.9, 1.9, 1.9, 1.9])
+sw = AN["classification"]["threshold_sweep"]
+para(f"The tuned tree outputs a probability; the alert uses 0.5 as the cut-off. Figure {nf()} and Table {nt()} show "
+     "the trade-off for other cut-offs: a lower threshold catches more peaks (recall) but raises more false "
+     "alarms (lower precision), and a higher threshold does the opposite. The F1-score is highest near the middle "
+     "of the range, which supports the default.")
+figure(AFIG / "classifier_threshold_sweep.png", "Precision, recall, F1 and accuracy against the decision threshold")
+table(["Threshold", "Precision", "Recall", "F1", "Accuracy"],
+      [[f"{r_['threshold']:.2f}", f"{r_['precision']:.3f}", f"{r_['recall']:.3f}", f"{r_['f1']:.3f}", f"{r_['accuracy']:.3f}"]
+       for r_ in sw[::2]], "Effect of the probability threshold (tuned decision tree, test set)", [3, 3, 3, 3, 3])
 cm = CT["confusion_matrix"]
 para(f"Of {cm[1][0] + cm[1][1]} real peak hours, {cm[1][1]} were caught and {cm[1][0]} missed; "
      f"{cm[0][1]} normal hours raised a false alarm. High recall with moderate precision is the safer trade-off "
@@ -836,6 +1060,17 @@ para(f"Significant drift was detected in {drifted} (PSI {mon['psi']['Sub_meterin
      f"({mon['recent_30d_mae']:.3f} kW) was {mon['mae_degradation_pct']:.1f}% above the reference test MAE as "
      "consumption climbed again in November. The monitor therefore set retraining_recommended = true, which "
      "is the behaviour a production MLOps loop requires.")
+dr = AN["drift"]
+para(f"Figure {nf()} follows drift month by month through the test period. The water-heater/AC sub-meter is "
+     "far from its training distribution in every summer month and moves back towards it in November, as heating "
+     f"returns. Test MAE follows the same seasonal pattern ({min(dr['monthly_mae'].values()):.3f}–"
+     f"{max(dr['monthly_mae'].values()):.3f} kW; Table {nt()}).")
+figure(AFIG / "monthly_drift.png", "PSI against the training data and test MAE, month by month", 16)
+mp = dr["monthly_psi"]
+feats_ = list(next(iter(mp.values())))
+table(["Month", *[f.replace("_lag1", "").replace("_", " ") for f in feats_], "MAE (kW)"],
+      [[m, *[f"{mp[m][f]:.3f}" for f in feats_], f"{dr['monthly_mae'][m]:.3f}"] for m in mp],
+      "Monthly PSI of monitored features and monthly test MAE", [1.8, *[1.9] * len(feats_), 1.6])
 
 heading("4.1.10. Ethical considerations", 3)
 fs = fair["slices"]
@@ -859,6 +1094,39 @@ para("**Transparency.** Feature importance is published, every number is reprodu
      "produced by the pipeline, and monitoring of rejected requests protect the service against malformed or "
      "abusive input.")
 figure(SHOT / "web_ethics.png", "Responsible-AI section of the web application", 15.5)
+
+heading("4.1.11. Execution evidence (terminal output)", 3)
+para("The figures in this section are the terminal output of the commands that build, test, deploy and "
+     "monitor the system, captured while they ran on the development machine (Windows 11, PowerShell). Each "
+     "image shows the exact command line and its unedited output; long outputs are split into numbered parts. "
+     "The raw text of every capture is kept in reports/terminal/ and the script that produced them is "
+     "report/capture_terminal.py.")
+terminal("env_versions", "Python and library versions used")
+terminal("git_log", "Git history of the project repository")
+terminal("dvc_dag", "dvc dag: the pipeline stages and their dependencies")
+terminal("dvc_repro", "dvc repro --force: full pipeline run (ingest, preprocess, features, training with GridSearchCV, "
+                      "classifier, monitoring, evaluation, export, analysis)")
+terminal("dvc_status", "dvc status after the run")
+terminal("dvc_metrics", "dvc metrics show: every tracked metric")
+terminal("pytest", "pytest -v: the automated test suite")
+terminal("mlflow_runs", "MLflow: tracked runs of the forecasting experiment")
+terminal("mlflow_registry", "MLflow model registry: versions of voltcast-forecaster")
+terminal("npm_build", "Building the React web application")
+terminal("docker_up", "docker compose up: building the image and starting the five services")
+terminal("docker_images", "Docker image and Compose services")
+terminal("api_health", "Flask API: health check and model information")
+terminal("api_forecast", "Flask API: 4-hour forecast with peak alerts")
+terminal("api_predict", "Flask API: POST /api/predict with one week of readings")
+terminal("api_invalid", "Flask API: invalid requests are rejected with HTTP 422")
+terminal("prometheus_metrics", "Prometheus metrics exposed by the API at /api/metrics")
+terminal("prometheus_query", "Prometheus: scrape target health and a PromQL query")
+terminal("prediction_log", "Prediction log (logs/predictions.jsonl)")
+terminal("grafana_api", "Grafana: provisioned dashboard and data source")
+terminal("k8s_validate", "Kubernetes manifest and Docker Compose configuration validation")
+terminal("ci_runs", "GitHub Actions: recent CI/CD runs")
+terminal("ci_run_view", "GitHub Actions: steps of the latest run")
+terminal("vercel_ls", "Vercel: production deployments created from GitHub pushes")
+terminal("live_site", "The live deployment answering requests")
 
 heading("4.1.11. Achievement of objectives", 3)
 table(["Objective (Section 2.6)", "Target", "Achieved"], [
@@ -969,6 +1237,81 @@ table(["Item", "Status"], [
     ["Fairness, transparency, privacy and security analysed (model card)", "✔"],
     ["User manual with step-by-step instructions", "✔"],
 ], "Design checklist", [12.5, 2.5])
+
+heading("3. Syllabus experiments performed in the project", 2)
+para("The practical experiments of MLOps-1 (25CSH-320) were carried out on this project's data instead of the "
+     "sample datasets suggested in the syllabus. Table A.2 maps each experiment to the code and the evidence in "
+     "this report.")
+table(["Exp.", "Aim (syllabus)", "How it was done in VoltCast", "Code", "Evidence"], [
+    ["1", "Preprocess data: cleaning, missing values, normalisation, split",
+     "1.25% missing readings filled (interpolation + weekly fill), IQR outlier report, StandardScaler for "
+     "linear/KNN/SVM, chronological train/validation/test split", "src/preprocess.py, src/train.py", "3.1, 4.1.1"],
+    ["2", "Linear regression evaluated with MSE", f"Linear regression: test MSE {TA['linear_regression']['mse']:.3f}, "
+     f"MAE {TA['linear_regression']['mae']:.3f}, R² {TA['linear_regression']['r2']:.3f}", "src/train.py", "4.1.2, 4.1.5"],
+    ["3", "Decision tree classifier: accuracy, confusion matrix, precision-recall",
+     f"Peak-hour decision tree: accuracy {CT['accuracy']:.3f}, precision {CT['precision']:.3f}, recall "
+     f"{CT['recall']:.3f}; confusion matrix, ROC and PR curves", "src/classify.py", "4.1.6"],
+    ["4", "GridSearchCV tuning; tuned vs default", "Grids for 5 regressors and the classifier, TimeSeriesSplit(5); "
+     f"tree MAE {DT['default_val']['mae']:.3f} → {DT['tuned_val']['mae']:.3f}", "src/train.py, src/classify.py", "4.1.4"],
+    ["5", "Version-controlled repository; ML in a DevOps pipeline", "Git + GitHub (Kunal039/voltcast), DVC "
+     "pipeline, GitHub Actions", "dvc.yaml, .github/", "4.1.8, 4.1.11"],
+    ["6", "Containerise the model with Docker", "Multi-stage Dockerfile (Node build + Python runtime), "
+     "five-service Docker Compose stack built and run", "Dockerfile, docker-compose.yml", "4.1.7, 4.1.11"],
+    ["7", "Flask REST API; Prometheus metrics", "Flask blueprint with 6 endpoints, Pydantic validation, "
+     "Prometheus counters and histograms", "serving/main.py, app.py", "4.1.7, 4.1.9"],
+    ["8", "CI/CD with GitHub Actions", "dvc repro, quality gates, pytest, React and Docker builds; Vercel "
+     "deploys every push", ".github/workflows/ci.yml", "4.1.8, 4.1.11"],
+    ["9", "Model versioning with DVC", "dvc.yaml with 9 stages, dvc.lock, dvc metrics; MLflow model registry",
+     "dvc.yaml, dvc.lock", "4.1.8, 4.1.11"],
+    ["10", "Monitoring and logging with Prometheus and Grafana", "Prometheus scrape config, provisioned Grafana "
+     "dashboard, JSON prediction log, PSI drift", "monitoring/, src/monitor.py", "4.1.9, 4.1.11"],
+    ["11–15", "Mini project phases 1–5", "Problem and data (Ch. 1–3), models (4.1.2–4.1.6), deployment (4.1.7), "
+     "automation (4.1.8), monitoring and ethics (4.1.9–4.1.10)", "whole repository", "Ch. 1–5"],
+], "Syllabus experiments mapped to the project", [1.2, 3.4, 5.6, 2.6, 2.2])
+
+heading("4. Source code", 2)
+para("This section lists the complete source code of the project as submitted (repository "
+     "https://github.com/Kunal039/voltcast). Generated files (trained models, metrics, figures), third-party "
+     "packages and the report-generation scripts are not listed.")
+for rel, title in [
+    ("configs/params.yaml", "central configuration"),
+    ("dvc.yaml", "DVC pipeline definition"),
+    ("run_pipeline.py", "pipeline runner"),
+    ("src/utils.py", "shared helpers"),
+    ("src/data_ingestion.py", "download, CSV conversion and schema check"),
+    ("src/preprocess.py", "cleaning, resampling and outlier report"),
+    ("src/features.py", "feature engineering"),
+    ("src/train.py", "model training, tuning and registry"),
+    ("src/classify.py", "peak-hour classifier"),
+    ("src/monitor.py", "drift monitoring"),
+    ("src/evaluate.py", "evaluation figures"),
+    ("src/analysis.py", "extended analysis"),
+    ("src/predict.py", "recursive forecasting"),
+    ("src/export_web.py", "web data export"),
+    ("serving/main.py", "Flask REST API"),
+    ("app.py", "web entry point"),
+    ("tests/test_pipeline.py", "automated tests"),
+    ("dashboard/app.py", "Streamlit dashboard"),
+    ("web/src/main.jsx", "React entry point"),
+    ("web/src/App.jsx", "React application"),
+    ("web/src/components/Plot.jsx", "Plotly wrapper component"),
+    ("web/src/components/Section.jsx", "shared section component"),
+    ("web/src/components/Forecast.jsx", "live forecast component"),
+    ("web/src/components/ModelPerformance.jsx", "model performance component"),
+    ("web/src/components/PeakAlerts.jsx", "classifier component"),
+    ("web/src/components/ResponsibleAI.jsx", "responsible-AI component"),
+    ("web/src/index.css", "styles"),
+    ("Dockerfile", "container image"),
+    ("docker-compose.yml", "multi-service stack"),
+    ("monitoring/prometheus.yml", "Prometheus scrape configuration"),
+    ("monitoring/grafana/provisioning/datasources/prometheus.yml", "Grafana data source"),
+    ("k8s/deployment.yaml", "Kubernetes manifests"),
+    (".github/workflows/ci.yml", "CI/CD workflow"),
+    ("vercel.json", "Vercel build configuration"),
+    ("requirements.txt", "serving dependencies"),
+    ("requirements-dev.txt", "development dependencies"),
+]:
+    code_listing(rel, title)
 
 # ================= USER MANUAL =================
 unnumbered("USER MANUAL", "M")

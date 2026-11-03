@@ -1,0 +1,231 @@
+{
+  "env_versions": {
+    "command": "python --version; pip list 2>$null | Select-String -Pattern '^(scikit-learn|pandas|numpy|mlflow|dvc|Flask|prometheus.client|pydantic|pytest|streamlit) '",
+    "time": "2026-11-03 11:35:19",
+    "seconds": 0.7,
+    "images": [
+      "env_versions.png"
+    ],
+    "lines": 12
+  },
+  "git_log": {
+    "command": "git log --oneline -n 15; git remote -v",
+    "time": "2026-11-03 11:35:19",
+    "seconds": 0.2,
+    "images": [
+      "git_log.png"
+    ],
+    "lines": 11
+  },
+  "dvc_dag": {
+    "command": "dvc dag",
+    "time": "2026-11-03 11:35:19",
+    "seconds": 1.5,
+    "images": [
+      "dvc_dag.png"
+    ],
+    "lines": 39
+  },
+  "dvc_repro": {
+    "command": "dvc repro --force",
+    "time": "2026-11-03 11:35:21",
+    "seconds": 354.1,
+    "images": [
+      "dvc_repro_part1.png",
+      "dvc_repro_part2.png",
+      "dvc_repro_part3.png"
+    ],
+    "lines": 92
+  },
+  "dvc_status": {
+    "command": "dvc status; dvc params diff --all HEAD~3 2>$null | Select-Object -First 12",
+    "time": "2026-11-03 11:41:15",
+    "seconds": 2.0,
+    "images": [
+      "dvc_status.png"
+    ],
+    "lines": 13
+  },
+  "dvc_metrics": {
+    "command": "dvc metrics show --json | python scripts/show_metrics.py",
+    "time": "2026-11-03 11:53:33",
+    "seconds": 1.1,
+    "images": [
+      "dvc_metrics_part1.png",
+      "dvc_metrics_part2.png"
+    ],
+    "lines": 59
+  },
+  "pytest": {
+    "command": "python -m pytest -v",
+    "time": "2026-11-03 11:41:19",
+    "seconds": 5.8,
+    "images": [
+      "pytest.png"
+    ],
+    "lines": 20
+  },
+  "mlflow_runs": {
+    "command": "mlflow runs list --experiment-id 1",
+    "time": "2026-11-03 11:41:25",
+    "seconds": 4.1,
+    "images": [
+      "mlflow_runs_part1.png",
+      "mlflow_runs_part2.png"
+    ],
+    "lines": 65
+  },
+  "mlflow_registry": {
+    "command": "python scripts/list_registry.py",
+    "time": "2026-11-03 11:55:23",
+    "seconds": 3.8,
+    "images": [
+      "mlflow_registry.png"
+    ],
+    "lines": 4
+  },
+  "npm_build": {
+    "command": "cd web; npm run build; cd ..",
+    "time": "2026-11-03 11:41:29",
+    "seconds": 5.7,
+    "images": [
+      "npm_build.png"
+    ],
+    "lines": 13
+  },
+  "docker_up": {
+    "command": "docker compose up -d --build 2>&1 | Select-Object -Last 12; docker compose ps",
+    "time": "2026-11-03 11:53:40",
+    "seconds": 12.6,
+    "images": [
+      "docker_up.png"
+    ],
+    "lines": 18
+  },
+  "docker_images": {
+    "command": "docker images voltcast; docker compose config --services",
+    "time": "2026-11-03 11:53:53",
+    "seconds": 0.5,
+    "images": [
+      "docker_images.png"
+    ],
+    "lines": 7
+  },
+  "api_health": {
+    "command": "curl.exe -s http://localhost:8000/api/health; ''; curl.exe -s http://localhost:8000/api/model-info | python -m json.tool",
+    "time": "2026-11-03 11:53:55",
+    "seconds": 0.3,
+    "images": [
+      "api_health.png"
+    ],
+    "lines": 39
+  },
+  "api_forecast": {
+    "command": "curl.exe -s 'http://localhost:8000/api/forecast?origin=2010-11-20T08:00&horizon=4' | python -c \"import sys,json; d=json.load(sys.stdin); print(json.dumps(d['forecast'], indent=2)); print('predicted_energy_kwh =', d['predicted_energy_kwh'])\"",
+    "time": "2026-11-03 11:53:55",
+    "seconds": 0.4,
+    "images": [
+      "api_forecast.png"
+    ],
+    "lines": 43
+  },
+  "api_predict": {
+    "command": "curl.exe -s http://localhost:8000/api/sample-request -o req.json; (Get-Content req.json | ConvertFrom-Json).history.Count; curl.exe -s -X POST -H 'Content-Type: application/json' --data-binary '@req.json' http://localhost:8000/api/predict | python -c \"import sys,json; d=json.load(sys.stdin); print('model:', d['model'], '| horizon:', d['horizon'], '| energy kWh:', d['predicted_energy_kwh']); [print(p['timestamp'], round(p['predicted_kw'],3), p['alert_method'], p['peak_alert']) for p in d['forecast'][:8]]\"; Remove-Item req.json",
+    "time": "2026-11-03 11:53:56",
+    "seconds": 0.9,
+    "images": [
+      "api_predict.png"
+    ],
+    "lines": 10
+  },
+  "api_invalid": {
+    "command": "curl.exe -s -w '  -> HTTP %{http_code}' 'http://localhost:8000/api/forecast?origin=2010-10-01T08:00&horizon=99'; ''; curl.exe -s -w '  -> HTTP %{http_code}' -X POST -H 'Content-Type: application/json' -d '{\\\"history\\\": [], \\\"horizon\\\": 5}' http://localhost:8000/api/predict",
+    "time": "2026-11-03 11:53:57",
+    "seconds": 0.3,
+    "images": [
+      "api_invalid.png"
+    ],
+    "lines": 4
+  },
+  "prometheus_metrics": {
+    "command": "curl.exe -s http://localhost:8000/api/metrics | Select-String -Pattern '^voltcast_' | Select-Object -First 45",
+    "time": "2026-11-03 11:54:24",
+    "seconds": 0.3,
+    "images": [
+      "prometheus_metrics.png"
+    ],
+    "lines": 46
+  },
+  "prometheus_query": {
+    "command": "curl.exe -s 'http://localhost:9090/api/v1/targets' | python -c \"import sys,json; [print('target', t['scrapeUrl'], 'health', t['health']) for t in json.load(sys.stdin)['data']['activeTargets']]\"; curl.exe -s 'http://localhost:9090/api/v1/query?query=sum(voltcast_predictions_total)' | python -m json.tool",
+    "time": "2026-11-03 11:54:24",
+    "seconds": 0.4,
+    "images": [
+      "prometheus_query.png"
+    ],
+    "lines": 16
+  },
+  "prediction_log": {
+    "command": "Get-Content logs\\predictions.jsonl -Tail 5",
+    "time": "2026-11-03 11:54:25",
+    "seconds": 0.2,
+    "images": [
+      "prediction_log.png"
+    ],
+    "lines": 5
+  },
+  "grafana_api": {
+    "command": "curl.exe -s 'http://localhost:3000/api/search?query=VoltCast' | python -m json.tool; curl.exe -s http://localhost:3000/api/datasources | python -m json.tool",
+    "time": "2026-11-03 11:54:25",
+    "seconds": 0.4,
+    "images": [
+      "grafana_api.png"
+    ],
+    "lines": 37
+  },
+  "ci_runs": {
+    "command": "gh run list --limit 8",
+    "time": "2026-11-03 11:54:25",
+    "seconds": 1.3,
+    "images": [
+      "ci_runs.png"
+    ],
+    "lines": 5
+  },
+  "ci_run_view": {
+    "command": "gh run view (gh run list --limit 1 --json databaseId --jq '.[0].databaseId')",
+    "time": "2026-11-03 11:54:27",
+    "seconds": 4.0,
+    "images": [
+      "ci_run_view.png"
+    ],
+    "lines": 20
+  },
+  "vercel_ls": {
+    "command": "npx --yes vercel ls voltcast 2>&1 | Select-Object -First 16",
+    "time": "2026-11-03 11:54:31",
+    "seconds": 28.3,
+    "images": [
+      "vercel_ls.png"
+    ],
+    "lines": 44
+  },
+  "live_site": {
+    "command": "curl.exe -s https://voltcast-forecast.vercel.app/api/health; ''; curl.exe -s -o NUL -w 'web app: HTTP %{http_code}, %{size_download} bytes' https://voltcast-forecast.vercel.app/",
+    "time": "2026-11-03 11:54:59",
+    "seconds": 7.8,
+    "images": [
+      "live_site.png"
+    ],
+    "lines": 3
+  },
+  "k8s_validate": {
+    "command": "python -c \"import yaml; docs=list(yaml.safe_load_all(open('k8s/deployment.yaml'))); [print(d['kind'], d['metadata']['name']) for d in docs]\"; docker compose config -q; 'docker compose config: OK'",
+    "time": "2026-11-03 11:55:07",
+    "seconds": 0.4,
+    "images": [
+      "k8s_validate.png"
+    ],
+    "lines": 4
+  }
+}

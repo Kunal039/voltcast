@@ -1,0 +1,12 @@
+PS D:\01 Projects\VoltCast> git log --oneline -n 15; git remote -v
+7196787 Align VoltCast with the MLOps-1 (25CSH-320) syllabus
+2720e31 Store the dataset as a single CSV instead of the raw UCI archive
+adf8f75 Rename project to VoltCast
+c0e3be6 Add CI/CT workflow: pipeline, quality gate, tests, React build, Docker image
+95b3202 Trigger first Git-based Vercel deployment
+3aea3d6 Use Plotly cartesian bundle to cut the web app's JS from 1.47 MB to 525 KB gzipped
+61d1c5e Rebuild the web dashboard as a React (Vite) app
+1f5540d Add live Vercel URL to README and report
+8a28f67 Household Electricity Consumption Prediction System (MLOps project)
+origin	https://github.com/Kunal039/voltcast.git (fetch)
+origin	https://github.com/Kunal039/voltcast.git (push)

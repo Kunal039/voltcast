@@ -41,6 +41,7 @@ src/train.py               9 regressors, GridSearchCV tuning, MLflow tracking an
 src/classify.py            peak-hour classifier (decision tree, GridSearchCV), classification metrics
 src/monitor.py             PSI data drift + error degradation -> retraining decision
 src/evaluate.py            EDA, model diagnostics, validation curve, classification and bias-slice figures
+src/analysis.py            every model on the test set, accuracy-style metrics, horizon/learning curves, CV folds
 src/predict.py             recursive multi-step forecasting with 95% intervals and peak alerts
 src/export_web.py          serving data + dashboard JSON for the web app
 serving/main.py            Flask REST API with Pydantic validation, Prometheus metrics, prediction log
@@ -52,8 +53,9 @@ k8s/deployment.yaml        Kubernetes Deployment, Service and autoscaler
 tests/test_pipeline.py     unit, leakage, classification, API and Prometheus tests
 dvc.yaml, dvc.lock         reproducible pipeline and the exact versions of every output
 MODEL_CARD.md              intended use, performance, fairness, privacy, security
-report/                    project report (.docx / .pdf) and its generator
-reports/                   metrics, monitoring output, figures, screenshots
+scripts/                   show_metrics.py (compact `dvc metrics show`), list_registry.py (MLflow registry)
+report/                    project report (.docx / .pdf, 134 pages) and its generators
+reports/                   metrics, monitoring, figures, analysis/, terminal/ (captured command output), screenshots
 ```
 
 ## Quick start
@@ -61,7 +63,7 @@ reports/                   metrics, monitoring output, figures, screenshots
 ```bash
 pip install -r requirements-dev.txt
 dvc repro                      # or: python run_pipeline.py   (about 4 minutes, includes GridSearchCV)
-dvc metrics show
+dvc metrics show --json | python scripts/show_metrics.py
 pytest -q                      # 11 tests
 ```
 
@@ -134,6 +136,7 @@ installs only `requirements.txt` (the slim serving dependencies) and runs the Fl
 ## Regenerating the report
 
 ```bash
-python report/make_diagrams.py
+python report/make_diagrams.py && python report/make_diagrams_more.py
+python report/capture_terminal.py      # re-runs the key commands and saves their output (Docker Desktop running)
 python report/build_report.py
 ```

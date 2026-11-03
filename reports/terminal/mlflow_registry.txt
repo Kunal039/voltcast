@@ -1,0 +1,5 @@
+PS D:\01 Projects\VoltCast> python scripts/list_registry.py
+voltcast-forecaster  version  1  status READY  run b7a5f2bb55a4  model=hist_gradient_boosting  test_mae=0.2934  test_r2=0.6227
+voltcast-forecaster  version  2  status READY  run b73093ca1c67  model=hist_gradient_boosting  test_mae=0.2934  test_r2=0.6227
+voltcast-forecaster  version  3  status READY  run 9d8c316ea235  model=hist_gradient_boosting  test_mae=0.2934  test_r2=0.6227
+voltcast-forecaster  version  4  status READY  run 0ae439f197d4  model=hist_gradient_boosting  test_mae=0.2934  test_r2=0.6227

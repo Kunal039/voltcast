@@ -171,7 +171,7 @@ stages:
     outs:
     - path: models/metadata.json
       hash: md5
-      md5: 073c255e10d0f25c552e2bdac7008cab
+      md5: 534dbd3cbf38ee09deb66b5386d47aaf
       size: 1538
     - path: models/model.joblib
       hash: md5
@@ -179,8 +179,8 @@ stages:
       size: 997998
     - path: reports/metrics.json
       hash: md5
-      md5: 0cc1ff581f71a0867998a5bfdfd5c874
-      size: 5953
+      md5: 6112578420c29c935fb36b42b3c18c50
+      size: 5949
     - path: reports/test_predictions.parquet
       hash: md5
       md5: 292a4a98578a8e52f0581566a113e1db
@@ -318,5 +318,145 @@ stages:
       size: 336866
     - path: web/public/data/dashboard.json
       hash: md5
-      md5: 9a1341d714b0b437eb020aa14618e0f5
-      size: 85553
+      md5: faacf16e0792f96ccf65e6b0ab152039
+      size: 85549
+  analyze:
+    cmd: python -m src.analysis
+    deps:
+    - path: data/processed/features.parquet
+      hash: md5
+      md5: 02a8ced0425b6089ea491a8193529ac4
+      size: 4738712
+    - path: data/serving/recent_hourly.csv
+      hash: md5
+      md5: c602c9d649ef45cd440fca3263210771
+      size: 336866
+    - path: models/model.joblib
+      hash: md5
+      md5: 49903bb2f3e6e18cac2127cee0deb780
+      size: 997998
+    - path: models/peak_classifier.json
+      hash: md5
+      md5: 09e85bbafed090b0cefeec9bf3db2e59
+      size: 190
+    - path: reports/metrics.json
+      hash: md5
+      md5: 6112578420c29c935fb36b42b3c18c50
+      size: 5949
+    - path: src/analysis.py
+      hash: md5
+      md5: 9e49e33509489917f1be1dab1d0eed8d
+      size: 22581
+    - path: src/train.py
+      hash: md5
+      md5: d98cd0f41215c1db029b2f044496d69c
+      size: 10104
+    params:
+      configs/params.yaml:
+        classification:
+          threshold_quantile: 0.75
+          decision_tree:
+            random_state: 42
+          grid:
+            max_depth:
+            - 3
+            - 5
+            - 7
+            - 9
+            - 12
+            - 
+            min_samples_leaf:
+            - 1
+            - 10
+            - 50
+            - 100
+            class_weight:
+            - 
+            - balanced
+        models:
+          linear_regression: {}
+          ridge_regression:
+            alpha: 1.0
+          decision_tree:
+            random_state: 42
+          knn:
+            n_neighbors: 10
+          svm:
+            C: 1.0
+            epsilon: 0.1
+          random_forest:
+            n_estimators: 200
+            max_depth: 16
+            min_samples_leaf: 5
+            n_jobs: -1
+            random_state: 42
+          hist_gradient_boosting:
+            max_iter: 500
+            learning_rate: 0.05
+            max_leaf_nodes: 31
+            l2_regularization: 1.0
+            random_state: 42
+        split:
+          train_end: '2009-12-31 23:00:00'
+          val_end: '2010-05-31 23:00:00'
+        tuning:
+          cv_splits: 5
+          scoring: neg_mean_absolute_error
+          grids:
+            ridge_regression:
+              alpha:
+              - 0.01
+              - 0.1
+              - 1.0
+              - 10.0
+              - 100.0
+            decision_tree:
+              max_depth:
+              - 4
+              - 6
+              - 8
+              - 10
+              - 14
+              - 
+              min_samples_leaf:
+              - 1
+              - 10
+              - 50
+              - 100
+            knn:
+              n_neighbors:
+              - 5
+              - 10
+              - 20
+              - 40
+              weights:
+              - uniform
+              - distance
+            random_forest:
+              max_depth:
+              - 10
+              - 16
+              - 
+              min_samples_leaf:
+              - 1
+              - 5
+              - 20
+            hist_gradient_boosting:
+              learning_rate:
+              - 0.03
+              - 0.05
+              - 0.1
+              max_leaf_nodes:
+              - 15
+              - 31
+              - 63
+    outs:
+    - path: reports/analysis
+      hash: md5
+      md5: d244858e41cef5ebddad3cdee3d32cab.dir
+      size: 1689517
+      nfiles: 19
+    - path: reports/analysis.json
+      hash: md5
+      md5: e810f6715e0525b5d22640d1028d7465
+      size: 23469

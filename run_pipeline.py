@@ -1,7 +1,7 @@
-"""Run the full MLOps pipeline end to end: ingest -> preprocess -> features -> train -> classify -> monitor -> evaluate -> export."""
+"""Run the full MLOps pipeline end to end: ingest -> preprocess -> features -> train -> classify -> monitor -> evaluate -> export -> analysis."""
 import time
 
-from src import classify, data_ingestion, evaluate, export_web, features, monitor, preprocess, train
+from src import analysis, classify, data_ingestion, evaluate, export_web, features, monitor, preprocess, train
 from src.utils import get_logger
 
 log = get_logger("pipeline")
@@ -15,6 +15,7 @@ STAGES = [
     ("monitor", monitor.main),
     ("evaluate", evaluate.main),
     ("export_web", export_web.main),
+    ("analysis", analysis.main),
 ]
 
 if __name__ == "__main__":

@@ -1,0 +1,14 @@
+PS D:\01 Projects\VoltCast> dvc status; dvc params diff --all HEAD~3 2>$null | Select-Object -First 12
+Data and pipelines are up to date.
+Path                 Param                                               HEAD~3    workspace
+configs\params.yaml  classification.decision_tree.random_state           -         42
+configs\params.yaml  classification.grid.class_weight                    -         [None, 'balanced']
+configs\params.yaml  classification.grid.max_depth                       -         [3, 5, 7, 9, 12, None]
+configs\params.yaml  classification.grid.min_samples_leaf                -         [1, 10, 50, 100]
+configs\params.yaml  classification.threshold_quantile                   -         0.75
+configs\params.yaml  data.max_interp_gap_hours                           -         6
+configs\params.yaml  data.resample_rule                                  -         1h
+configs\params.yaml  data.url                                            -         https://archive.ics.uci.edu/static/public/235/individual+household+electric+power+consumption.zip
+configs\params.yaml  features.lags                                       -         [1, 2, 3, 6, 12, 24, 48, 168]
+configs\params.yaml  features.rolling_windows                            -         [3, 6, 24, 168]
+configs\params.yaml  features.target                                     -         Global_active_power

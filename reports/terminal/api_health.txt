@@ -1,0 +1,40 @@
+PS D:\01 Projects\VoltCast> curl.exe -s http://localhost:8000/api/health; ''; curl.exe -s http://localhost:8000/api/model-info | python -m json.tool
+{"model":"hist_gradient_boosting","status":"ok","trained_at":"2026-11-03T06:08:52+00:00"}
+
+{
+    "baseline_test_metrics": {
+        "mae": 0.37725552916526794,
+        "mape": 46.87059783935547,
+        "mse": 0.3289504945278168,
+        "r2": 0.3348791003227234,
+        "rmse": 0.573542059946624
+    },
+    "hyperparameters": {
+        "l2_regularization": 1.0,
+        "learning_rate": 0.05,
+        "max_iter": 500,
+        "max_leaf_nodes": 31,
+        "random_state": 42
+    },
+    "mlflow_run_id": "0ae439f197d44ce6b052eca89998b4ee",
+    "model_name": "hist_gradient_boosting",
+    "n_features": 31,
+    "peak_threshold_kw": 1.5895000100135803,
+    "test_metrics": {
+        "mae": 0.2934236884615469,
+        "mape": 39.49231062570404,
+        "mse": 0.18659425185159015,
+        "r2": 0.6227160753609795,
+        "rmse": 0.4319655679004869
+    },
+    "test_period": [
+        "2010-06-01 00:00:00",
+        "2010-11-26 21:00:00"
+    ],
+    "train_period": [
+        "2006-12-23 17:00:00",
+        "2010-05-31 23:00:00"
+    ],
+    "trained_at": "2026-11-03T06:08:52+00:00",
+    "tuned": false
+}

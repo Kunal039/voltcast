@@ -1,0 +1,17 @@
+PS D:\01 Projects\VoltCast> curl.exe -s 'http://localhost:9090/api/v1/targets' | python -c "import sys,json; [print('target', t['scrapeUrl'], 'health', t['health']) for t in json.load(sys.stdin)['data']['activeTargets']]"; curl.exe -s 'http://localhost:9090/api/v1/query?query=sum(voltcast_predictions_total)' | python -m json.tool
+target http://api:8000/api/metrics health up
+{
+    "status": "success",
+    "data": {
+        "resultType": "vector",
+        "result": [
+            {
+                "metric": {},
+                "value": [
+                    1793687065.183,
+                    "464"
+                ]
+            }
+        ]
+    }
+}

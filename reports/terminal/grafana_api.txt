@@ -1,0 +1,38 @@
+PS D:\01 Projects\VoltCast> curl.exe -s 'http://localhost:3000/api/search?query=VoltCast' | python -m json.tool; curl.exe -s http://localhost:3000/api/datasources | python -m json.tool
+[
+    {
+        "id": 1,
+        "uid": "voltcast",
+        "title": "VoltCast - Model Monitoring",
+        "uri": "db/voltcast-model-monitoring",
+        "url": "/d/voltcast/voltcast-model-monitoring",
+        "slug": "",
+        "type": "dash-db",
+        "tags": [
+            "mlops",
+            "voltcast"
+        ],
+        "isStarred": false,
+        "sortMeta": 0,
+        "isDeleted": false
+    }
+]
+[
+    {
+        "id": 1,
+        "uid": "prometheus",
+        "orgId": 1,
+        "name": "Prometheus",
+        "type": "prometheus",
+        "typeName": "Prometheus",
+        "typeLogoUrl": "public/app/plugins/datasource/prometheus/img/prometheus_logo.svg",
+        "access": "proxy",
+        "url": "http://prometheus:9090",
+        "user": "",
+        "database": "",
+        "basicAuth": false,
+        "isDefault": true,
+        "jsonData": {},
+        "readOnly": true
+    }
+]
