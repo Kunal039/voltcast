@@ -7,11 +7,11 @@ persistence_baseline          0.4487     0.4414     0.6686     0.3635       0.0
 seasonal_naive_24h            0.6625     0.6359     0.9121    -0.1845       0.0
 linear_regression             0.4086     0.3980     0.5568     0.5586       0.0
 ridge_regression              0.4086     0.3980     0.5568     0.5586       0.0
-decision_tree                 0.0000     0.5059     0.7762     0.1423       0.7
+decision_tree                 0.0000     0.5059     0.7762     0.1423       0.8
 knn                           0.3470     0.3948     0.5662     0.5435       0.0
-svm                           0.2960     0.3554     0.5311     0.5983      33.3
-random_forest                 0.2203     0.3451     0.5087     0.6316       3.8
-hist_gradient_boosting        0.2895     0.3415     0.4982     0.6466       0.7
+svm                           0.2960     0.3554     0.5311     0.5983      47.4
+random_forest                 0.2203     0.3451     0.5087     0.6316       8.9
+hist_gradient_boosting        0.2895     0.3415     0.4982     0.6466       1.7
 
 reports/metrics.json - GridSearchCV tuning
 model                        cv_mae   default_mae   tuned_mae                                 best_params
@@ -23,7 +23,7 @@ hist_gradient_boosting       0.3630        0.3415      0.3438       learning_rat
 
 reports/metrics.json - test (selected model vs baseline)
 model                           mae        mse       rmse         r2      mape
-hist_gradient_boosting       0.2934     0.1866     0.4320     0.6227      39.5
+random_forest                0.2947     0.1880     0.4336     0.6199      40.8
 persistence_baseline         0.3773     0.3290     0.5735     0.3349      46.9
 
 reports/classification.json - peak threshold 1.590 kW, selected decision_tree_tuned
@@ -33,14 +33,14 @@ decision_tree_default (val)          0.7701      0.6102    0.5888    0.5993    0
 decision_tree_tuned (val)            0.7903      0.6035    0.8214    0.6958    0.8792
 decision_tree_tuned (test)           0.8030      0.4537    0.7795    0.5736    0.8728
 
-reports/monitoring.json - drifted (PSI > 0.2): roll_mean_24, Sub_metering_3_lag1; recent MAE 0.3497 (+19.2%); retraining_recommended = True
+reports/monitoring.json - drifted (PSI > 0.2): roll_mean_24, Sub_metering_3_lag1; recent MAE 0.3511 (+19.1%); retraining_recommended = True
   PSI: lag_1=0.189, roll_mean_24=0.289, Voltage_lag1=0.169, Global_intensity_lag1=0.200, Sub_metering_3_lag1=0.729, hour=0.000, target=0.189
 
-reports/fairness.json - overall test MAE 0.2934
-  Day type     Weekday=0.278, Weekend=0.333
-  Time of day  Night 0-5=0.158, Morning 6-11=0.298, Afternoon 12-17=0.329, Evening 18-23=0.389
-  Season       Summer (Jun-Aug)=0.254, Autumn (Sep-Nov)=0.335
-  Usage level  Low use=0.154, Medium use=0.286, High use=0.439
+reports/fairness.json - overall test MAE 0.2947
+  Day type     Weekday=0.283, Weekend=0.326
+  Time of day  Night 0-5=0.153, Morning 6-11=0.295, Afternoon 12-17=0.337, Evening 18-23=0.394
+  Season       Summer (Jun-Aug)=0.256, Autumn (Sep-Nov)=0.335
+  Usage level  Low use=0.163, Medium use=0.298, High use=0.423
 
 reports/analysis.json - every model on the test set
 model                                mae      rmse        r2   acc(1-WAPE)    ±0.5kW %

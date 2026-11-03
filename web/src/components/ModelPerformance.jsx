@@ -10,7 +10,7 @@ export default function ModelPerformance({ D }) {
   const tuning = D.metrics.tuning;
   const names = Object.keys(V);
   const ml = names.filter((n) => !isBaseline(n));
-  const best = ml.reduce((a, b) => (V[a].rmse < V[b].rmse ? a : b));
+  const best = D.model.model_name; // the deployed model (best syllabus algorithm on validation)
   const dt = tuning.decision_tree;
 
   const charts = useMemo(() => {
@@ -34,7 +34,7 @@ export default function ModelPerformance({ D }) {
 
   return (
     <Section title="Model performance"
-      sub="Nine models (the syllabus algorithms plus ridge, gradient boosting and two naive baselines) trained on 2006–2009 and compared on Jan–May 2010 in MLflow. The best one is refit and scored once on the untouched test period.">
+      sub="Nine models trained on 2006–2009 and compared on Jan–May 2010 in MLflow. Only syllabus algorithms (linear and ridge regression, decision tree, KNN, SVM, random forest) may be deployed; gradient boosting and two naive baselines are kept as reference points. The deployed model (highlighted) is refit and scored once on the untouched test period.">
       <div className="grid2">
         <div className="card">
           <table>

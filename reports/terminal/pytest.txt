@@ -18,4 +18,4 @@ tests/test_pipeline.py::test_predict_rejects_invalid_reading PASSED      [ 81%]
 tests/test_pipeline.py::test_prometheus_metrics_exposed PASSED           [ 90%]
 tests/test_pipeline.py::test_model_beats_baseline PASSED                 [100%]
 
-============================= 11 passed in 3.08s ==============================
+============================= 11 passed in 5.01s ==============================

@@ -32,7 +32,8 @@ from src.features import feature_columns
 from src.utils import ROOT, get_logger, load_params, resolve
 
 log = get_logger("train")
-TRUSTED_TYPES = ["sklearn.ensemble._hist_gradient_boosting.predictor.TreePredictor"]
+# Tree node storage of the models this pipeline itself trains (forests, single trees, boosting).
+TRUSTED_TYPES = ["sklearn.ensemble._hist_gradient_boosting.predictor.TreePredictor", "sklearn.tree._tree.Tree"]
 
 
 def split(df: pd.DataFrame, params: dict):
@@ -151,11 +152,15 @@ def main() -> None:
         log.info("tuned %-18s %s  CV MAE=%.4f  val MAE %.4f -> %.4f", name, search.best_params_unprefixed,
                  tuning[name]["cv_mae"], results[name]["mae"], tuned_val["mae"])
 
-    # 3. Pick the best variant (default or tuned) of any ML model on validation RMSE.
+    # 3. Pick the best variant (default or tuned) on validation RMSE among the syllabus algorithms;
+    #    the best model overall is recorded for comparison only.
     variants = [(n, None, results[n]["rmse"]) for n in CANDIDATES if n not in ("persistence_baseline", "seasonal_naive_24h")]
     variants += [(n, t["best_params"], t["tuned_val"]["rmse"]) for n, t in tuning.items()]
-    best, best_params, _ = min(variants, key=lambda v: v[2])
-    log.info("Best model on validation: %s (%s)", best, "tuned " + str(best_params) if best_params else "default")
+    overall = min(variants, key=lambda v: v[2])
+    allowed = params["selection"]["deployable"]
+    best, best_params, _ = min((v for v in variants if v[0] in allowed), key=lambda v: v[2])
+    log.info("Best model on validation: %s (%s); best overall incl. reference models: %s", best,
+             "tuned " + str(best_params) if best_params else "default", overall[0])
 
     full = pd.concat([train, val])
     final = build(best, params, cols, best_params)
@@ -179,11 +184,12 @@ def main() -> None:
 
     models_dir = ROOT / "models"
     models_dir.mkdir(exist_ok=True)
-    joblib.dump(final, models_dir / "model.joblib")
+    joblib.dump(final, models_dir / "model.joblib", compress=3)  # a 200-tree forest is ~65 MB uncompressed
     metadata = {
         "model_name": best,
         "hyperparameters": {**params["models"].get(best, {}), **(best_params or {})},
         "tuned": best_params is not None,
+        "selection": {"deployable": allowed, "best_overall": overall[0], "best_overall_val_rmse": overall[2]},
         "trained_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "mlflow_run_id": run_id,
         "features": cols,

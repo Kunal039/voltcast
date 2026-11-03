@@ -128,7 +128,7 @@ def test_metric_bars(results):
                                           ("accuracy_1_minus_wape", "Accuracy (1 - WAPE)")]):
         vals = [results[n][k] for n in names]
         cols = [GREY if "baseline" in n or "naive" in n else BLUE for n in names]
-        cols[names.index("hist_gradient_boosting")] = ORANGE
+        cols[names.index(json.loads((ROOT / "models" / "metadata.json").read_text())["model_name"])] = ORANGE
         ax.barh([LABELS[n] for n in names], vals, color=cols)
         ax.invert_yaxis()
         ax.set_title(f"Test {title}")

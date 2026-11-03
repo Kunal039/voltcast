@@ -3,42 +3,42 @@ PS D:\01 Projects\VoltCast> curl.exe -s 'http://localhost:8000/api/forecast?orig
   {
     "actual_kw": 1.9728,
     "alert_method": "classifier",
-    "lower_kw": 1.0586979364355322,
+    "lower_kw": 1.0440121522042913,
     "peak_alert": true,
     "peak_probability": 0.8211008411466739,
-    "predicted_kw": 1.9050365682161594,
+    "predicted_kw": 1.8922671352878044,
     "timestamp": "2010-11-20T08:00:00",
-    "upper_kw": 2.7513751999967866
+    "upper_kw": 2.7405221183713175
   },
   {
     "actual_kw": 1.8751,
     "alert_method": "forecast_threshold",
-    "lower_kw": 0.5879006478606261,
+    "lower_kw": 0.6308628874162989,
     "peak_alert": true,
     "peak_probability": null,
-    "predicted_kw": 1.7848042192850784,
+    "predicted_kw": 1.8304765888435635,
     "timestamp": "2010-11-20T09:00:00",
-    "upper_kw": 2.981707790709531
+    "upper_kw": 3.030090290270828
   },
   {
     "actual_kw": 1.2921,
     "alert_method": "forecast_threshold",
-    "lower_kw": 0.3413651628438117,
+    "lower_kw": 0.5244922833344032,
     "peak_alert": true,
     "peak_probability": null,
-    "predicted_kw": 1.8072666734961857,
+    "predicted_kw": 1.9937130118085262,
     "timestamp": "2010-11-20T10:00:00",
-    "upper_kw": 3.2731681841485596
+    "upper_kw": 3.462933740282649
   },
   {
     "actual_kw": 2.6911,
     "alert_method": "forecast_threshold",
-    "lower_kw": 0.16769150915341613,
+    "lower_kw": 0.30759458182664656,
     "peak_alert": true,
     "peak_probability": null,
-    "predicted_kw": 1.8603687727146707,
+    "predicted_kw": 2.0041045479936725,
     "timestamp": "2010-11-20T11:00:00",
-    "upper_kw": 3.5530460362759255
+    "upper_kw": 3.7006145141606988
   }
 ]
-predicted_energy_kwh = 7.357
+predicted_energy_kwh = 7.721

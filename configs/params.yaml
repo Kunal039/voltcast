@@ -44,6 +44,11 @@ models:
     l2_regularization: 1.0
     random_state: 42
 
+# Only algorithms from the MLOps-1 syllabus may be deployed. Gradient boosting and the
+# naive baselines are still trained and reported as reference points.
+selection:
+  deployable: [linear_regression, ridge_regression, decision_tree, knn, svm, random_forest]
+
 # GridSearchCV with time-series cross-validation (folds never train on the future).
 tuning:
   cv_splits: 5

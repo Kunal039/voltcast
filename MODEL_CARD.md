@@ -4,9 +4,9 @@
 | | Forecaster | Peak-hour classifier |
 |---|---|---|
 | Task | Regression: household active power (kW) for each of the next 1–48 hours | Binary classification: will the next hour exceed the peak threshold (75th percentile of training consumption, 1.59 kW)? |
-| Algorithm | `HistGradientBoostingRegressor` (scikit-learn), 500 iterations, learning rate 0.05, 31 leaves | `DecisionTreeClassifier` tuned with GridSearchCV (max_depth 12, min_samples_leaf 50, balanced class weights) |
+| Algorithm | `RandomForestRegressor` (scikit-learn), 200 trees, max depth 16, min 5 samples per leaf | `DecisionTreeClassifier` tuned with GridSearchCV (max_depth 12, min_samples_leaf 50, balanced class weights) |
 | Inputs | 31 features computed only from past readings: lags (1–168 h), rolling mean/std, calendar, previous-hour electrical readings | same 31 features |
-| Selection | Best validation RMSE among 9 candidates (2 baselines, linear, ridge, decision tree, KNN, SVM, random forest, gradient boosting), default and GridSearchCV-tuned | Best validation F1 among logistic regression, default tree, tuned tree |
+| Selection | Best validation RMSE among the syllabus algorithms (linear, ridge, decision tree, KNN, SVM, random forest), default and GridSearchCV-tuned; gradient boosting and 2 baselines are trained as reference points only | Best validation F1 among logistic regression, default tree, tuned tree |
 | Versioning | MLflow model registry (`voltcast-forecaster`), DVC pipeline (`dvc.lock`), Git | MLflow experiment `household-electricity-forecasting-peak-classifier` |
 
 ## Intended use
@@ -19,7 +19,8 @@ UCI *Individual Household Electric Power Consumption* (Hebrail & Berard, 2012, C
 ## Performance (held-out test set, Jun–Nov 2010)
 | Forecaster | MAE | RMSE | R² |
 |---|---|---|---|
-| Gradient boosting | 0.293 kW | 0.432 kW | 0.623 |
+| Random forest (deployed) | 0.295 kW | 0.434 kW | 0.620 |
+| Gradient boosting (reference) | 0.293 kW | 0.432 kW | 0.623 |
 | Persistence baseline | 0.377 kW | 0.574 kW | 0.335 |
 
 | Classifier | Accuracy | Precision | Recall | F1 | ROC-AUC |

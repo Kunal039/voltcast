@@ -15,6 +15,8 @@ MIN_HISTORY_HOURS = 169  # longest lag (168h) + 1
 @lru_cache(maxsize=1)
 def load_model():
     model = joblib.load(ROOT / "models" / "model.joblib")
+    if "n_jobs" in model.get_params():
+        model.set_params(n_jobs=1)  # forecasts predict one row at a time; worker start-up would dominate
     meta = json.loads((ROOT / "models" / "metadata.json").read_text())
     return model, meta
 
@@ -45,7 +47,7 @@ def forecast(history: pd.DataFrame, horizon: int = 1) -> pd.DataFrame:
 
     Peak-hour alerts: the classifier is a next-hour model, so it is used for
     step 1 only. Later hours are flagged when the forecast exceeds the peak
-    threshold, which measured 77% accurate over hours 2-24 versus 57% for the
+    threshold, which measured 76% accurate over hours 2-24 versus 58% for the
     classifier fed carried-forward readings.
     """
     params = load_params()

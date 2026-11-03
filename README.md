@@ -8,7 +8,7 @@ tracking, tuned models, a Flask REST API in Docker, CI/CD, and monitoring with P
 
 - **Live demo:** https://voltcast-forecast.vercel.app (React web app + Flask API, auto-deployed from this repo by Vercel)
 - **Dataset:** [UCI Individual Household Electric Power Consumption](https://archive.ics.uci.edu/dataset/235/individual+household+electric+power+consumption): 2,075,259 one-minute readings from one house near Paris, Dec 2006 – Nov 2010. Stored as `data/household_power_consumption.csv` (downloaded automatically, versioned with DVC).
-- **Forecaster:** Histogram Gradient Boosting, test MAE **0.293 kW**, RMSE **0.432 kW**, R² **0.623** (22% lower MAE than the persistence baseline)
+- **Forecaster:** Random Forest (a syllabus algorithm), test MAE **0.295 kW**, RMSE **0.434 kW**, R² **0.620**, accuracy (1 − WAPE) **67.9%** (22% lower MAE than the persistence baseline)
 - **Peak-hour classifier:** decision tree tuned with GridSearchCV, test accuracy **80.3%**, recall **77.9%**, ROC-AUC **0.873**
 
 ## Syllabus coverage (25CSH-320)
@@ -17,7 +17,7 @@ tracking, tuned models, a Flask REST API in Docker, CI/CD, and monitoring with P
 |---|---|
 | Exp 1 · Data preprocessing: cleaning, missing values, outliers, normalisation, train/val/test split | `src/data_ingestion.py`, `src/preprocess.py` (gap filling, IQR outlier report), `StandardScaler` for KNN/SVM, chronological split in `src/train.py` |
 | Exp 2 · Linear regression evaluated with MSE | `linear_regression` in `src/train.py`; MSE, RMSE, MAE, R² in `reports/metrics.json` |
-| Unit 1–2 algorithms: linear regression, decision tree, KNN, SVM, random forest | all trained and compared in `src/train.py`, plus ridge, gradient boosting and two baselines |
+| Unit 1–2 algorithms: linear regression, decision tree, KNN, SVM, random forest | all trained and compared in `src/train.py`; only these may be deployed (`selection.deployable` in `params.yaml`), so Random Forest is deployed. Gradient boosting and two baselines are kept as reference points |
 | Exp 3 · Decision tree classifier: accuracy, confusion matrix, precision–recall | `src/classify.py` (peak-hour classifier), `reports/figures/fig_classification.png` |
 | Exp 4 · GridSearchCV tuning, tuned vs default | `tune()` in `src/train.py` and `src/classify.py`, time-series cross-validation, `fig_tuning.png` |
 | Overfitting, underfitting, regularisation | train vs validation error (`fig_train_vs_val.png`), depth validation curve (`fig_validation_curve.png`), ridge `alpha` search |
@@ -117,11 +117,12 @@ Validation period Jan–May 2010 (default hyper-parameters):
 | Decision tree | 0.000 | 0.506 | 0.776 | 0.142 |
 | K-nearest neighbours | 0.347 | 0.395 | 0.566 | 0.544 |
 | SVM (SVR) | 0.296 | 0.355 | 0.531 | 0.598 |
-| Random forest | 0.220 | 0.345 | 0.509 | 0.632 |
-| **Gradient boosting** | 0.289 | **0.341** | **0.498** | **0.647** |
+| **Random forest (deployed)** | 0.220 | **0.345** | **0.509** | **0.632** |
+| Gradient boosting (reference, not deployable) | 0.289 | 0.341 | 0.498 | 0.647 |
 
 The default decision tree over-fits (zero training error). GridSearchCV picks `max_depth=10, min_samples_leaf=100`,
-which cuts its validation MAE from 0.506 to 0.380. Gradient boosting with default settings stays the best model and is deployed.
+which cuts its validation MAE from 0.506 to 0.380. The default Random Forest is the best syllabus algorithm and is deployed;
+the gradient-boosting reference is better by only 0.001 kW test MAE.
 
 Monitoring flags seasonal drift (PSI 0.73 on the water-heater/AC sub-meter between the winter-heavy training data
 and the summer test period) and recommends retraining. Bias analysis shows the largest errors in evening and

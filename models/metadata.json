@@ -1,15 +1,27 @@
 {
-  "model_name": "hist_gradient_boosting",
+  "model_name": "random_forest",
   "hyperparameters": {
-    "max_iter": 500,
-    "learning_rate": 0.05,
-    "max_leaf_nodes": 31,
-    "l2_regularization": 1.0,
+    "n_estimators": 200,
+    "max_depth": 16,
+    "min_samples_leaf": 5,
+    "n_jobs": -1,
     "random_state": 42
   },
   "tuned": false,
-  "trained_at": "2026-11-03T06:08:52+00:00",
-  "mlflow_run_id": "0ae439f197d44ce6b052eca89998b4ee",
+  "selection": {
+    "deployable": [
+      "linear_regression",
+      "ridge_regression",
+      "decision_tree",
+      "knn",
+      "svm",
+      "random_forest"
+    ],
+    "best_overall": "hist_gradient_boosting",
+    "best_overall_val_rmse": 0.49820544978433706
+  },
+  "trained_at": "2026-11-03T13:28:44+00:00",
+  "mlflow_run_id": "8246d832650d40dbad189730dff0cf27",
   "features": [
     "hour",
     "dayofweek",
@@ -52,11 +64,11 @@
     "2010-11-26 21:00:00"
   ],
   "test_metrics": {
-    "mae": 0.2934236884615469,
-    "mse": 0.18659425185159015,
-    "rmse": 0.4319655679004869,
-    "r2": 0.6227160753609795,
-    "mape": 39.49231062570404
+    "mae": 0.29474407418193477,
+    "mse": 0.18797786385717724,
+    "rmse": 0.43356414041889724,
+    "r2": 0.6199184834605562,
+    "mape": 40.843455988883896
   },
   "baseline_test_metrics": {
     "mae": 0.37725552916526794,
@@ -65,5 +77,5 @@
     "r2": 0.3348791003227234,
     "mape": 46.87059783935547
   },
-  "residual_std": 0.43180542437787106
+  "residual_std": 0.4327831546344454
 }

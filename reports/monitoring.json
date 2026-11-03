@@ -12,8 +12,8 @@
     "roll_mean_24",
     "Sub_metering_3_lag1"
   ],
-  "recent_30d_mae": 0.3497,
-  "reference_test_mae": 0.2934,
-  "mae_degradation_pct": 19.17,
+  "recent_30d_mae": 0.3511,
+  "reference_test_mae": 0.2947,
+  "mae_degradation_pct": 19.11,
   "retraining_recommended": true
 }

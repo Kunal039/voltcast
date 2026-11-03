@@ -4,7 +4,7 @@ import Forecast from "./components/Forecast.jsx";
 import ModelPerformance from "./components/ModelPerformance.jsx";
 import PeakAlerts from "./components/PeakAlerts.jsx";
 import ResponsibleAI from "./components/ResponsibleAI.jsx";
-import Section, { hbar } from "./components/Section.jsx";
+import Section, { LABEL, hbar } from "./components/Section.jsx";
 
 const REPO = "https://github.com/Kunal039/voltcast";
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -17,7 +17,7 @@ function Kpis({ D }) {
     ["Test RMSE", `${T.rmse.toFixed(3)} kW`, `${pct(T.rmse, B.rmse)}% better than baseline`],
     ["Test R²", T.r2.toFixed(3), `+${(T.r2 - B.r2).toFixed(3)} vs baseline`],
     ["Training data", `${(D.stats.raw_rows / 1e6).toFixed(2)} M`, "one-minute readings"],
-    ["Model", "Gradient Boosting", `${D.model.n_features} engineered features`],
+    ["Model", LABEL[D.model.model_name], `${D.model.n_features} engineered features`],
   ];
   return (
     <div className="kpis">

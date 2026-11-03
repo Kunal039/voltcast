@@ -335,9 +335,12 @@ para(f"The UCI “Individual Household Electric Power Consumption” dataset ({s
      "Nine regression models covering the algorithms of the course (linear regression, decision tree, k-nearest "
      "neighbours, support vector machine, random forest) plus ridge regression, gradient boosting and two naive "
      "baselines are trained on a chronological split, tuned with GridSearchCV using time-series cross-validation, "
-     "and tracked in MLflow. Histogram gradient boosting gives the best forecast: test MAE "
-     f"{T['mae']:.3f} kW, MSE {T['mse']:.3f}, R² {T['r2']:.3f}, a {MAE_GAIN:.1f}% MAE reduction over the "
-     f"persistence baseline. A tuned decision-tree classifier detects peak hours with {CT['accuracy']*100:.1f}% "
+     "and tracked in MLflow. Only syllabus algorithms are eligible for deployment, and the best of them, "
+     f"random forest, is deployed: test MAE {T['mae']:.3f} kW, MSE {T['mse']:.3f}, R² {T['r2']:.3f}, "
+     f"accuracy (1 − WAPE) {AN['test_all_models'][meta['model_name']]['accuracy_1_minus_wape'] * 100:.1f}%, a "
+     f"{MAE_GAIN:.1f}% MAE reduction over the persistence baseline and within "
+     f"{abs(AN['test_all_models']['hist_gradient_boosting']['mae'] - T['mae']):.3f} kW of the best reference model "
+     f"(gradient boosting). A tuned decision-tree classifier detects peak hours with {CT['accuracy']*100:.1f}% "
      f"accuracy, {CT['recall']*100:.1f}% recall and ROC-AUC {CT['roc_auc']:.3f}. The experiments also show "
      f"over-fitting clearly: the default decision tree reaches zero training error but the worst validation "
      f"error, which tuning reduces from {DT['default_val']['mae']:.3f} to {DT['tuned_val']['mae']:.3f} kW.")
@@ -716,7 +719,7 @@ para("**Design B – Modular MLOps pipeline.** Each stage is an independent, tes
 
 heading("3.5. Design selection", 2)
 table(["Criterion", "Design A", "Design B"], [
-    ["Expected accuracy", "High (with tuning)", "High (gradient boosting)"],
+    ["Expected accuracy", "High (with tuning)", "High (random forest, a syllabus algorithm)"],
     ["Training cost / hardware", "GPU preferred, minutes–hours", "CPU, about 4 min including tuning"],
     ["Reproducibility", "Low: hidden notebook state", "High: params.yaml + DVC + Docker"],
     ["Experiment tracking", "Manual", "Automatic (MLflow)"],
@@ -759,8 +762,13 @@ para("**Data split.** To respect time ordering, data is split chronologically: t
 para("**Regression models.** Persistence (ŷₜ = yₜ₋₁) and seasonal-naive (ŷₜ = yₜ₋₂₄) "
      "baselines; linear regression and ridge regression (standardised inputs); decision tree; k-nearest "
      "neighbours (k = 10, standardised); support vector regression (RBF kernel, C = 1, ε = 0.1, standardised); "
-     "random forest (200 trees, depth 16) [8]; histogram gradient boosting (500 iterations, η = 0.05, "
+     "random forest (200 trees, depth 16, minimum 5 rows per leaf) [8]; and, as a reference model outside "
+     "the syllabus, histogram gradient boosting (500 iterations, η = 0.05, "
      "31 leaves) [9], [18]. All are implemented with scikit-learn [20].")
+para("**Model selection rule.** All models are compared, but only the algorithms of the MLOps-1 syllabus "
+     "(linear and ridge regression, decision tree, KNN, SVM and random forest) may be deployed. Among them the "
+     "variant (default or tuned) with the lowest validation RMSE is chosen. Gradient boosting and the two naive "
+     "baselines are reported as reference points, so the cost of this rule can be measured (Section 4.1.5).")
 para("**Hyper-parameter tuning.** GridSearchCV searches the grids in params.yaml using TimeSeriesSplit with "
      "five folds, so every fold trains on the past and validates on the following period, which is the "
      "time-series form of cross-validation [21]. Tuned and default variants are both compared on the "
@@ -821,10 +829,13 @@ for n, m in V.items():
     rows.append([f"**{c}**" for c in r] if n == meta["model_name"] else r)
 table(["Model", "Train MAE", "Val MAE", "Val MSE", "Val RMSE", "Val R²", "Fit (s)"], rows,
       "Training and validation performance of all models (default hyper-parameters)", [4.8, 1.7, 1.7, 1.7, 1.8, 1.6, 1.4])
-figure(FIG / "fig_model_comparison.png", "Validation MAE and R² of all models (best in orange, baselines in grey)")
+figure(FIG / "fig_model_comparison.png", "Validation MAE and R² of all models (deployed model in orange, baselines in grey)")
 figure(SHOT / "mlflow.png", "MLflow tracking UI: runs of every model, tuned variant and final model", 15)
-para(f"Gradient boosting has the lowest validation RMSE ({V['hist_gradient_boosting']['rmse']:.3f} kW), "
-     f"closely followed by random forest and the SVM. Linear and ridge regression are identical at α = 1 and "
+para(f"Among the syllabus algorithms, random forest has the lowest validation RMSE "
+     f"({V['random_forest']['rmse']:.3f} kW), followed by the SVM ({V['svm']['rmse']:.3f} kW); it is therefore the "
+     f"deployed model. The reference gradient-boosting model is slightly lower still "
+     f"({V['hist_gradient_boosting']['rmse']:.3f} kW), a difference of "
+     f"{V['random_forest']['rmse'] - V['hist_gradient_boosting']['rmse']:.3f} kW. Linear and ridge regression are identical at α = 1 and "
      f"form a strong linear reference (R² {V['linear_regression']['r2']:.3f}). The seasonal-naive model has "
      "negative R²: yesterday's same hour is a worse predictor than the mean, which confirms that household "
      "load is driven by irregular routines.")
@@ -874,14 +885,14 @@ para(f"Tuning helps most where the default was poorly regularised: the decision 
      f"limited. KNN gains by averaging over more neighbours with distance weighting; ridge prefers strong "
      f"regularisation (α = {TUN['ridge_regression']['best_params']['alpha']}) but gains little. For random forest "
      "and gradient boosting the defaults were already well chosen, and the small differences are within the "
-     "noise between cross-validation and the validation window. Default gradient boosting therefore remains the "
-     "selected model.")
+     "noise between cross-validation and the validation window. The default random forest (200 trees, depth 16, "
+     "minimum 5 rows per leaf) therefore remains the selected model.")
 
 heading("4.1.5. Test-set results of the forecaster", 3)
 para(f"The selected model was refit on train+validation and evaluated once on the untouched test period (Table {nt()}).")
 table(["Model", "MAE (kW)", "MSE", "RMSE (kW)", "R²", "MAPE (%)"], [
     ["Persistence baseline", f"{B['mae']:.3f}", f"{B['mse']:.3f}", f"{B['rmse']:.3f}", f"{B['r2']:.3f}", f"{B['mape']:.1f}"],
-    ["**Histogram gradient boosting**", f"**{T['mae']:.3f}**", f"**{T['mse']:.3f}**", f"**{T['rmse']:.3f}**",
+    [f"**{LBL[meta['model_name']]}**", f"**{T['mae']:.3f}**", f"**{T['mse']:.3f}**", f"**{T['rmse']:.3f}**",
      f"**{T['r2']:.3f}**", f"**{T['mape']:.1f}**"],
     ["Improvement", f"{MAE_GAIN:.1f}%", f"{(1 - T['mse'] / B['mse']) * 100:.1f}%", f"{RMSE_GAIN:.1f}%",
      f"+{T['r2'] - B['r2']:.3f}", "–"],
@@ -908,9 +919,12 @@ para(f"Accuracy-style metrics make the regression results easier to read. Accura
      f"{best_t['accuracy_1_minus_wape'] * 100:.1f}% for the deployed model against "
      f"{TA['persistence_baseline']['accuracy_1_minus_wape'] * 100:.1f}% for persistence. "
      f"{best_t['within_0_25kw_pct']:.1f}% of hourly forecasts are within ±0.25 kW of the actual value and "
-     f"{best_t['within_0_5kw_pct']:.1f}% within ±0.5 kW. Gradient boosting is also best on the test set, ahead of "
-     "random forest and SVM, and the tuned variants rank as on validation. This confirms the selection was not a "
-     "lucky choice.")
+     f"{best_t['within_0_5kw_pct']:.1f}% within ±0.5 kW. The ranking on the test set matches validation: random "
+     "forest is the best syllabus algorithm, ahead of the SVM, and the reference gradient-boosting model is better "
+     f"by only {best_t['mae'] - TA['hist_gradient_boosting']['mae']:.4f} kW MAE "
+     f"({(TA['hist_gradient_boosting']['accuracy_1_minus_wape'] - best_t['accuracy_1_minus_wape']) * 100:.1f} "
+     "percentage points of accuracy). Restricting deployment to syllabus algorithms therefore costs almost nothing, "
+     "and the selection was not a lucky choice.")
 figure(AFIG / "test_metrics_all_models.png", "Test MAE, RMSE, R² and accuracy (1 − WAPE) of every model", 16)
 para(f"Figures {nf()}–{nf(3)} show the behaviour of each model on the test set: a week of forecasts, the "
      "predicted-vs-actual scatter, and the residual distribution.")
@@ -990,7 +1004,7 @@ para(f"Of {cm[1][0] + cm[1][1]} real peak hours, {cm[1][1]} were caught and {cm[
      f"where the regression forecast exceeds τ, is more accurate ({CR['accuracy']:.3f}) but catches only "
      f"{CR['recall']*100:.0f}% of peaks. The deployed system uses the classifier for the next hour, and the "
      "forecast-threshold rule for later hours, where the classifier's inputs are no longer current. On 40 random "
-     "test origins this rule was 77% accurate over hours 2–24, against 57% for the classifier.")
+     "test origins this rule was 76% accurate over hours 2–24, against 58% for the classifier.")
 
 heading("4.1.7. Deployment", 3)
 para("The forecaster and classifier are served by a Flask REST API (Table "
@@ -1147,7 +1161,8 @@ heading("5.1. Conclusion", 2)
 para("VoltCast is a complete, working Household Electricity Consumption Prediction System built on MLOps "
      "principles. From 2.07 million raw smart-meter readings, a DVC-versioned pipeline produces a clean hourly "
      "series and 31 leakage-free features. Nine regression models, covering every algorithm in the course, "
-     "are compared and tuned with GridSearchCV under MLflow tracking. The selected gradient boosting model "
+     "are compared and tuned with GridSearchCV under MLflow tracking. The deployed random forest, the best "
+     "syllabus algorithm and within a few thousandths of a kilowatt of the gradient-boosting reference, "
      f"forecasts with a test MAE of {T['mae']:.3f} kW and R² of {T['r2']:.3f}, {MAE_GAIN:.1f}% better than the "
      f"persistence baseline. A tuned decision tree flags peak hours with {CT['recall']*100:.0f}% recall and "
      f"ROC-AUC {CT['roc_auc']:.3f}. The models are served by a Flask API in Docker and on the Vercel cloud, "
@@ -1159,7 +1174,7 @@ para("**Expected vs obtained results.** The ≥ 15% improvement over the baselin
      "inherently unpredictable. (ii) We use a strict chronological split and refuse features computed from the "
      "hour being predicted, whereas some studies shuffle data or use same-hour intensity, which inflates "
      "scores. (iii) The test period has a different seasonal distribution from training, which the monitor "
-     "correctly flagged. MAPE (~39%) is inflated by very low night-time loads, where small absolute errors "
+     f"correctly flagged. MAPE (~{T['mape']:.0f}%) is inflated by very low night-time loads, where small absolute errors "
      "become large percentages; MAE, MSE and R² are the more meaningful measures here. Hyper-parameter tuning "
      "helped the poorly regularised models (decision tree, KNN) but not the ensembles, whose defaults were "
      "already near-optimal. The peak classifier's precision on the test period is lower than on validation "

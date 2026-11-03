@@ -74,7 +74,7 @@ def model_figures(params: dict) -> None:
     names = list(m)
     fig, axes = plt.subplots(1, 2, figsize=(9, 3.2))
     colors = [GREY if "baseline" in n or "naive" in n else BLUE for n in names]
-    best = min([n for n in names if colors[names.index(n)] == BLUE], key=lambda n: m[n]["rmse"])
+    best = json.loads((ROOT / "models" / "metadata.json").read_text())["model_name"]  # deployed model
     colors[names.index(best)] = ORANGE
     labels = [LABELS.get(n, n) for n in names]
     axes[0].barh(labels, [m[n]["mae"] for n in names], color=colors)

@@ -87,8 +87,8 @@ stages:
       size: 2885
     - path: src/train.py
       hash: md5
-      md5: d98cd0f41215c1db029b2f044496d69c
-      size: 10104
+      md5: ba409a37542e19be18de5c195abb4ca0
+      size: 10668
     params:
       configs/params.yaml:
         models:
@@ -171,20 +171,20 @@ stages:
     outs:
     - path: models/metadata.json
       hash: md5
-      md5: 534dbd3cbf38ee09deb66b5386d47aaf
-      size: 1538
+      md5: 51a105e12d06707cc66bca4980232bb2
+      size: 1798
     - path: models/model.joblib
       hash: md5
-      md5: 49903bb2f3e6e18cac2127cee0deb780
-      size: 997998
+      md5: 4e4ab1c16a5cce0b6cacb67bf36512bf
+      size: 22452318
     - path: reports/metrics.json
       hash: md5
-      md5: 6112578420c29c935fb36b42b3c18c50
+      md5: 897aec0126555f8acc66d2285a0a8ac6
       size: 5949
     - path: reports/test_predictions.parquet
       hash: md5
-      md5: 292a4a98578a8e52f0581566a113e1db
-      size: 101896
+      md5: 276ff3565352405727e065be774133d8
+      size: 102344
   classify:
     cmd: python -m src.classify
     deps:
@@ -194,8 +194,8 @@ stages:
       size: 4738712
     - path: reports/test_predictions.parquet
       hash: md5
-      md5: 292a4a98578a8e52f0581566a113e1db
-      size: 101896
+      md5: 276ff3565352405727e065be774133d8
+      size: 102344
     - path: src/classify.py
       hash: md5
       md5: c7f5f132cb39dfdc60b81d31e3bd56ab
@@ -236,19 +236,19 @@ stages:
       size: 190
     - path: reports/classification.json
       hash: md5
-      md5: 48e69bb1da21b8122ca9e9bd893d6503
+      md5: cd969e97ee1205c7c1c1d515cb8b96d7
       size: 16026
   monitor:
     cmd: python -m src.monitor
     deps:
     - path: models/model.joblib
       hash: md5
-      md5: 49903bb2f3e6e18cac2127cee0deb780
-      size: 997998
+      md5: 4e4ab1c16a5cce0b6cacb67bf36512bf
+      size: 22452318
     - path: reports/test_predictions.parquet
       hash: md5
-      md5: 292a4a98578a8e52f0581566a113e1db
-      size: 101896
+      md5: 276ff3565352405727e065be774133d8
+      size: 102344
     - path: src/monitor.py
       hash: md5
       md5: c6151d9564508d1a18433e5cfa1f6e6a
@@ -261,51 +261,51 @@ stages:
     outs:
     - path: reports/monitoring.json
       hash: md5
-      md5: 1368dbb705474af9deffae93fd770691
+      md5: ce93f967e366a01e9f0bb7173d9aaf9c
       size: 424
   evaluate:
     cmd: python -m src.evaluate
     deps:
     - path: models/model.joblib
       hash: md5
-      md5: 49903bb2f3e6e18cac2127cee0deb780
-      size: 997998
+      md5: 4e4ab1c16a5cce0b6cacb67bf36512bf
+      size: 22452318
     - path: reports/classification.json
       hash: md5
-      md5: 48e69bb1da21b8122ca9e9bd893d6503
+      md5: cd969e97ee1205c7c1c1d515cb8b96d7
       size: 16026
     - path: reports/monitoring.json
       hash: md5
-      md5: 1368dbb705474af9deffae93fd770691
+      md5: ce93f967e366a01e9f0bb7173d9aaf9c
       size: 424
     - path: src/evaluate.py
       hash: md5
-      md5: 3357b98e0234d50a1218fd61fd6a03a2
-      size: 13655
+      md5: d691e9cd98375ce07a22483b20884201
+      size: 13661
     outs:
     - path: reports/fairness.json
       hash: md5
-      md5: 280c7452135dfb2a801ccf1fb532d6e2
-      size: 1057
+      md5: 9cc5d9dea00c2cee41e301aa8293c3c5
+      size: 1060
     - path: reports/figures
       hash: md5
-      md5: 36418ae35ca722c8d3f850d86d3fb64f.dir
-      size: 810355
+      md5: 309f683f8208b6d3125db733f0cf803d.dir
+      size: 810415
       nfiles: 17
   export_web:
     cmd: python -m src.export_web
     deps:
     - path: models/model.joblib
       hash: md5
-      md5: 49903bb2f3e6e18cac2127cee0deb780
-      size: 997998
+      md5: 4e4ab1c16a5cce0b6cacb67bf36512bf
+      size: 22452318
     - path: reports/classification.json
       hash: md5
-      md5: 48e69bb1da21b8122ca9e9bd893d6503
+      md5: cd969e97ee1205c7c1c1d515cb8b96d7
       size: 16026
     - path: reports/monitoring.json
       hash: md5
-      md5: 1368dbb705474af9deffae93fd770691
+      md5: ce93f967e366a01e9f0bb7173d9aaf9c
       size: 424
     - path: src/export_web.py
       hash: md5
@@ -318,8 +318,8 @@ stages:
       size: 336866
     - path: web/public/data/dashboard.json
       hash: md5
-      md5: faacf16e0792f96ccf65e6b0ab152039
-      size: 85549
+      md5: 54e5589a325eb118f04c54755d546f7d
+      size: 85555
   analyze:
     cmd: python -m src.analysis
     deps:
@@ -333,24 +333,24 @@ stages:
       size: 336866
     - path: models/model.joblib
       hash: md5
-      md5: 49903bb2f3e6e18cac2127cee0deb780
-      size: 997998
+      md5: 4e4ab1c16a5cce0b6cacb67bf36512bf
+      size: 22452318
     - path: models/peak_classifier.json
       hash: md5
       md5: 09e85bbafed090b0cefeec9bf3db2e59
       size: 190
     - path: reports/metrics.json
       hash: md5
-      md5: 6112578420c29c935fb36b42b3c18c50
+      md5: 897aec0126555f8acc66d2285a0a8ac6
       size: 5949
     - path: src/analysis.py
       hash: md5
-      md5: 9e49e33509489917f1be1dab1d0eed8d
-      size: 22581
+      md5: a59aa27ceae9c9892ae5199c16a98c5b
+      size: 22630
     - path: src/train.py
       hash: md5
-      md5: d98cd0f41215c1db029b2f044496d69c
-      size: 10104
+      md5: ba409a37542e19be18de5c195abb4ca0
+      size: 10668
     params:
       configs/params.yaml:
         classification:
@@ -453,10 +453,10 @@ stages:
     outs:
     - path: reports/analysis
       hash: md5
-      md5: d244858e41cef5ebddad3cdee3d32cab.dir
-      size: 1689517
+      md5: 6705e7ae35e99fd1a7cdf0346aa8d6df.dir
+      size: 1688558
       nfiles: 19
     - path: reports/analysis.json
       hash: md5
-      md5: e810f6715e0525b5d22640d1028d7465
-      size: 23469
+      md5: 69eb4fae9388d36870388154780afa39
+      size: 23458

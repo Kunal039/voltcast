@@ -1,55 +1,55 @@
 {
-  "overall_mae": 0.2934236884615469,
+  "overall_mae": 0.29474407418193477,
   "slices": {
     "Day type": {
       "Weekday": {
-        "mae": 0.2781,
+        "mae": 0.2827,
         "hours": 3094
       },
       "Weekend": {
-        "mae": 0.333,
+        "mae": 0.3258,
         "hours": 1200
       }
     },
     "Time of day": {
       "Night 0-5": {
-        "mae": 0.1583,
+        "mae": 0.1527,
         "hours": 1074
       },
       "Morning 6-11": {
-        "mae": 0.298,
+        "mae": 0.2951,
         "hours": 1074
       },
       "Afternoon 12-17": {
-        "mae": 0.3285,
+        "mae": 0.3369,
         "hours": 1074
       },
       "Evening 18-23": {
-        "mae": 0.3891,
+        "mae": 0.3944,
         "hours": 1072
       }
     },
     "Season": {
       "Summer (Jun-Aug)": {
-        "mae": 0.2543,
+        "mae": 0.2564,
         "hours": 2208
       },
       "Autumn (Sep-Nov)": {
-        "mae": 0.3348,
+        "mae": 0.3353,
         "hours": 2086
       }
     },
     "Usage level": {
       "Low use": {
-        "mae": 0.1545,
+        "mae": 0.1634,
         "hours": 1432
       },
       "Medium use": {
-        "mae": 0.2864,
+        "mae": 0.2981,
         "hours": 1431
       },
       "High use": {
-        "mae": 0.4394,
+        "mae": 0.4228,
         "hours": 1431
       }
     }
