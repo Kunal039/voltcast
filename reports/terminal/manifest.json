@@ -10,12 +10,12 @@
   },
   "git_log": {
     "command": "git log --oneline -n 15; git remote -v",
-    "time": "2026-11-03 18:51:55",
-    "seconds": 0.3,
+    "time": "2026-11-03 19:21:38",
+    "seconds": 0.2,
     "images": [
       "git_log.png"
     ],
-    "lines": 13
+    "lines": 14
   },
   "dvc_dag": {
     "command": "dvc dag",
@@ -186,17 +186,17 @@
   },
   "ci_runs": {
     "command": "gh run list --limit 8",
-    "time": "2026-11-03 19:04:51",
-    "seconds": 1.6,
+    "time": "2026-11-03 19:21:39",
+    "seconds": 1.5,
     "images": [
       "ci_runs.png"
     ],
-    "lines": 7
+    "lines": 8
   },
   "ci_run_view": {
     "command": "gh run view (gh run list --limit 1 --json databaseId --jq '.[0].databaseId')",
-    "time": "2026-11-03 19:04:53",
-    "seconds": 4.0,
+    "time": "2026-11-03 19:21:40",
+    "seconds": 4.1,
     "images": [
       "ci_run_view.png"
     ],
@@ -204,8 +204,8 @@
   },
   "vercel_ls": {
     "command": "npx --yes vercel ls voltcast 2>&1 | Where-Object { $_ -notmatch 'hint|CategoryInfo|FullyQualified|At line|~~~|^\\s*\\+|^node.exe' } | Select-Object -First 16",
-    "time": "2026-11-03 19:04:57",
-    "seconds": 5.5,
+    "time": "2026-11-03 19:21:44",
+    "seconds": 5.4,
     "images": [
       "vercel_ls.png"
     ],
@@ -213,8 +213,8 @@
   },
   "live_site": {
     "command": "curl.exe -s https://voltcast-forecast.vercel.app/api/health; ''; curl.exe -s -o NUL -w 'web app: HTTP %{http_code}, %{size_download} bytes' https://voltcast-forecast.vercel.app/",
-    "time": "2026-11-03 19:05:03",
-    "seconds": 8.3,
+    "time": "2026-11-03 19:21:50",
+    "seconds": 8.6,
     "images": [
       "live_site.png"
     ],

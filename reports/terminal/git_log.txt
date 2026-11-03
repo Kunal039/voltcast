@@ -1,4 +1,5 @@
 PS D:\01 Projects\VoltCast> git log --oneline -n 15; git remote -v
+7007dcb Deploy Random Forest, the best syllabus algorithm, instead of gradient boosting
 a0f8975 Re-capture the Vercel deployment list without CLI hint noise
 027effb Expand the project report to 134 pages with full results and execution evidence
 9a4dc59 Align VoltCast with the MLOps-1 (25CSH-320) syllabus

@@ -352,7 +352,7 @@ para("The models are versioned with DVC and the MLflow model registry, and serve
      "monitor based on the Population Stability Index correctly detected seasonal drift and recommended "
      "retraining. Fairness, transparency, privacy and security are analysed, including error across groups "
      "of hours.")
-para("Keywords: load forecasting, smart meter, gradient boosting, decision tree, GridSearchCV, MLOps, MLflow, "
+para("Keywords: load forecasting, smart meter, random forest, decision tree, GridSearchCV, MLOps, MLflow, "
      "DVC, Flask, Docker, Prometheus, Grafana, responsible AI.", italic=True)
 
 unnumbered("GRAPHICAL ABSTRACT")
