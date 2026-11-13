@@ -1,0 +1,8 @@
+# Never convert line endings in binary files (a converted PDF or model is corrupted).
+*.pdf binary
+*.docx binary
+*.png binary
+*.jpg binary
+*.joblib binary
+*.parquet binary
+*.gz binary
