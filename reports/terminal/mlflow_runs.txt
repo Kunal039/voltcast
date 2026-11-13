@@ -1,6 +1,30 @@
 PS D:\01 Projects\VoltCast> mlflow runs list --experiment-id 1
 Date                                     Name                          ID                              
 ---------------------------------------  ----------------------------  --------------------------------
+2026-11-13 12:26:50 India Standard Time  random_forest_final           874ef8e4ed5642ff993085092d39f2f9
+2026-11-13 12:26:42 India Standard Time  random_forest_tuned           1912063e73d44c1e873a3a2223e1f9dd
+2026-11-13 12:24:22 India Standard Time  knn_tuned                     d2355bc827784b6da39c43ddadb70c6c
+2026-11-13 12:24:14 India Standard Time  decision_tree_tuned           60299da07d7342e49cce3e9d1f6b8eea
+2026-11-13 12:24:11 India Standard Time  ridge_regression_tuned        23b89be06681448eb7353c68e392ce86
+2026-11-13 12:24:01 India Standard Time  random_forest                 edb87059c9bd4bfb908974d1c0f68040
+2026-11-13 12:23:10 India Standard Time  svm                           809a670a7f7441b3ae76e65227c1203d
+2026-11-13 12:23:09 India Standard Time  knn                           524a8c55a6784eb2af55174406814b16
+2026-11-13 12:23:08 India Standard Time  seasonal_naive_24h            ff64a750642c45ba8ea623ef0a9eca55
+2026-11-13 12:23:08 India Standard Time  ridge_regression              8234b63b2a8d49cc8ca53cf2623ecc0c
+2026-11-13 12:23:08 India Standard Time  persistence_baseline          e747c33c8f354afd9862d0fc106e392b
+2026-11-13 12:23:08 India Standard Time  linear_regression             d5703642bf1f4c5dbe4625cf82d3f2f8
+2026-11-13 12:23:08 India Standard Time  decision_tree                 86ba575b03a6478a93c747cb94512499
+2026-11-12 11:08:38 India Standard Time  knn_tuned                     df3fbb55fcd94a17aa63864f14ac9d05
+2026-11-12 11:08:24 India Standard Time  decision_tree_tuned           f1e21e7a4c33434aadc64c10eea643fb
+2026-11-12 11:08:18 India Standard Time  ridge_regression_tuned        41983fda16a147a9a07cb4a01364f5ee
+2026-11-12 11:08:00 India Standard Time  random_forest                 8e4fa070b2ba4bc1a3b4dc9b3f614b0b
+2026-11-12 11:05:56 India Standard Time  svm                           f67df1dd7bcb43f08736ade8dd520924
+2026-11-12 11:05:55 India Standard Time  knn                           87bd6e3322454d8f9365240c3e48ca4a
+2026-11-12 11:05:54 India Standard Time  seasonal_naive_24h            524eab95ed42440390a79f049b9b8220
+2026-11-12 11:05:54 India Standard Time  ridge_regression              f050d56e3e444b97845269274ecdf11f
+2026-11-12 11:05:54 India Standard Time  persistence_baseline          c0be673812914523a6b32003bdd13e42
+2026-11-12 11:05:54 India Standard Time  linear_regression             7af1249cc99644369385be98fb3df166
+2026-11-12 11:05:54 India Standard Time  decision_tree                 9888fc9b1f474aa1b4bc22163f84f4b8
 2026-11-03 18:58:31 India Standard Time  random_forest_final           8246d832650d40dbad189730dff0cf27
 2026-11-03 18:58:20 India Standard Time  hist_gradient_boosting_tuned  b4e3a869be684fc49931d371047a18f5
 2026-11-03 18:58:03 India Standard Time  random_forest_tuned           9d4a8201ca044474a0ed4d6f245b4ccd

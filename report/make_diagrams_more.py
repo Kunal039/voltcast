@@ -257,6 +257,60 @@ def dvc_dag():
     save("dvc_dag.png")
 
 
+def entity(ax, x, y, name, fields, w=3.4):
+    """ER entity: title bar plus attribute list (PK/FK marked)."""
+    h = 0.42 * (len(fields) + 1)
+    ax.add_patch(FancyBboxPatch((x, y - h), w, h, boxstyle="square,pad=0", fc="white", ec="#333", lw=1))
+    ax.add_patch(FancyBboxPatch((x, y - 0.42), w, 0.42, boxstyle="square,pad=0", fc=BLUE, ec="#333", lw=1))
+    ax.text(x + w / 2, y - 0.21, name, ha="center", va="center", fontsize=8, weight="bold")
+    for i, f in enumerate(fields):
+        ax.text(x + 0.1, y - 0.42 * (i + 1.5), f, va="center", fontsize=6.8)
+    return (x, y, w, h)
+
+
+def er_diagram():
+    fig, ax = canvas(11, 7.2, 17.5, 11.5)
+    e = {}
+    e["reading"] = entity(ax, 0.2, 11.2, "MINUTE_READING (CSV)", ["PK Datetime", "Global_active_power (kW)",
+                          "Global_reactive_power (kW)", "Voltage (V)", "Global_intensity (A)",
+                          "Sub_metering_1..3 (Wh)"])
+    e["hourly"] = entity(ax, 4.6, 11.2, "HOURLY_RECORD", ["PK datetime (hour)", "mean power, voltage, current",
+                         "sum Sub_metering_1..3", "Sub_metering_other (Wh)"])
+    e["feature"] = entity(ax, 9.0, 11.2, "FEATURE_ROW", ["PK datetime", "FK -> HOURLY_RECORD", "31 features (lags,",
+                          "  rolling, calendar, t-1)", "target (kW)"])
+    e["pred"] = entity(ax, 13.4, 11.2, "PREDICTION_LOG (JSONL)", ["time", "source (predict/forecast)",
+                       "FK model -> REGISTERED_MODEL", "horizon, first_hour", "predicted_kw[ ]", "peak_hours"], w=3.9)
+    e["exp"] = entity(ax, 0.2, 5.6, "EXPERIMENT", ["PK experiment_id", "name"])
+    e["run"] = entity(ax, 4.6, 5.6, "RUN", ["PK run_id", "FK experiment_id", "run_name, status", "start/end time"])
+    e["param"] = entity(ax, 9.0, 7.0, "PARAM", ["FK run_id", "key", "value"])
+    e["metric"] = entity(ax, 9.0, 4.4, "METRIC", ["FK run_id", "key (val_mae, test_r2 ...)", "value, step"])
+    e["rm"] = entity(ax, 0.2, 2.4, "REGISTERED_MODEL", ["PK name", "(voltcast-forecaster)"])
+    e["mv"] = entity(ax, 4.6, 2.4, "MODEL_VERSION", ["PK name + version", "FK run_id", "status, source"])
+    e["dvc"] = entity(ax, 13.4, 5.6, "DVC_STAGE (dvc.lock)", ["PK stage name", "cmd", "deps: path + md5",
+                      "params", "outs: path + md5"], w=3.9)
+
+    def link(a, b, label, side_a="r", side_b="l"):
+        xa, ya, wa, ha = e[a]
+        xb, yb, wb, hb = e[b]
+        pa = {"r": (xa + wa, ya - ha / 2), "b": (xa + wa / 2, ya - ha), "l": (xa, ya - ha / 2), "t": (xa + wa / 2, ya)}[side_a]
+        pb = {"r": (xb + wb, yb - hb / 2), "b": (xb + wb / 2, yb - hb), "l": (xb, yb - hb / 2), "t": (xb + wb / 2, yb)}[side_b]
+        ax.add_patch(FancyArrowPatch(pa, pb, arrowstyle="-", lw=0.9, color="#333"))
+        ax.text((pa[0] + pb[0]) / 2, (pa[1] + pb[1]) / 2 + 0.12, label, ha="center", fontsize=6.8, style="italic")
+
+    link("reading", "hourly", "60 : 1")
+    link("hourly", "feature", "1 : 1")
+    link("exp", "run", "1 : N")
+    link("run", "param", "1 : N")
+    link("run", "metric", "1 : N")
+    link("rm", "mv", "1 : N")
+    link("mv", "run", "N : 1", "t", "b")
+    link("feature", "run", "trains (N : M)", "b", "t")
+    ax.text(0.2, 0.25, "Data files: CSV, Parquet and JSON Lines. Experiment metadata: MLflow's SQLite database (mlflow.db). "
+            "Pipeline lineage: dvc.lock.", fontsize=7, style="italic")
+    ax.set_title("Entity-relationship diagram of the data stored by VoltCast", fontsize=10, weight="bold")
+    save("er_diagram.png")
+
+
 def stage_flowcharts():
     flowchart("flow_preprocess.png", [
         ("Start", "terminal"), ("Read CSV, parse Datetime, cast float32", "box"),
@@ -265,7 +319,7 @@ def stage_flowcharts():
         ("IQR outlier report (values kept)", "box"), ("Save hourly.parquet + data_stats.json", "box"), ("End", "terminal")],
         "Flowchart: preprocessing stage")
     flowchart("flow_training.png", [
-        ("Start", "terminal"), ("Load features, chronological split", "box"), ("For each of 9 algorithms", "box"),
+        ("Start", "terminal"), ("Load features, chronological split", "box"), ("For each of 8 models", "box"),
         ("Fit on train; score train + validation", "model"), ("Log params & metrics to MLflow", "box"),
         ("Grid defined for model?", "decision"), ("GridSearchCV, TimeSeriesSplit(5)", "model"),
         ("More algorithms?", "decision"), ("Pick lowest validation RMSE", "box"),
@@ -273,8 +327,8 @@ def stage_flowcharts():
         "Flowchart: training and tuning stage", decisions=[(5, 7, "no"), (7, 2, "yes (next algorithm)")],
         down_labels={7: "no"})
     flowchart("flow_classifier.png", [
-        ("Start", "terminal"), ("Label: consumption > 75th percentile", "box"), ("Train logistic regression", "model"),
-        ("Train default decision tree", "model"), ("GridSearchCV tree (F1, TimeSeriesSplit)", "model"),
+        ("Start", "terminal"), ("Label: consumption > 75th percentile", "box"), ("Train default decision tree", "model"),
+        ("GridSearchCV tree (F1, TimeSeriesSplit)", "model"), ("Train random forest classifier", "model"),
         ("Select best validation F1", "box"), ("Refit on train + val", "model"),
         ("Accuracy, precision, recall, F1, AUC, confusion matrix", "box"), ("Save classifier + threshold", "box"), ("End", "terminal")],
         "Flowchart: peak-hour classifier stage")
@@ -301,4 +355,5 @@ if __name__ == "__main__":
     cicd()
     dvc_dag()
     stage_flowcharts()
+    er_diagram()
     print("diagrams written")

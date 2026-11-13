@@ -27,3 +27,4 @@ monitoring/
 k8s/
 .dvc/
 dvc.lock
+data/household_power_consumption.csv.gz

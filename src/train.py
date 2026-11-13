@@ -1,7 +1,7 @@
 """Stage 4 - Training: compare candidate models with MLflow tracking, tune them, register the best.
 
-1. Every syllabus algorithm (linear regression, decision tree, KNN, SVM, random forest)
-   plus ridge, gradient boosting and two naive baselines is trained with default settings.
+1. Every syllabus algorithm (linear and ridge regression, decision tree, KNN, SVM,
+   random forest) and two naive baselines are trained with default settings.
    Train and validation errors are both recorded to expose over- and under-fitting.
 2. Models with a grid in params.yaml are tuned with GridSearchCV using time-series
    cross-validation on the training period (each fold only trains on the past).
@@ -18,7 +18,7 @@ import mlflow.sklearn
 import numpy as np
 import pandas as pd
 from mlflow.models import infer_signature
-from sklearn.ensemble import HistGradientBoostingRegressor, RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import GridSearchCV, TimeSeriesSplit
@@ -32,8 +32,8 @@ from src.features import feature_columns
 from src.utils import ROOT, get_logger, load_params, resolve
 
 log = get_logger("train")
-# Tree node storage of the models this pipeline itself trains (forests, single trees, boosting).
-TRUSTED_TYPES = ["sklearn.ensemble._hist_gradient_boosting.predictor.TreePredictor", "sklearn.tree._tree.Tree"]
+# Tree node storage of the models this pipeline itself trains (single trees and forests).
+TRUSTED_TYPES = ["sklearn.tree._tree.Tree"]
 
 
 def split(df: pd.DataFrame, params: dict):
@@ -78,13 +78,12 @@ def build(name: str, params: dict, cols: list[str], overrides: dict | None = Non
         "knn": lambda: make_pipeline(StandardScaler(), KNeighborsRegressor(**hp)),
         "svm": lambda: make_pipeline(StandardScaler(), SVR(**hp)),
         "random_forest": lambda: RandomForestRegressor(**hp),
-        "hist_gradient_boosting": lambda: HistGradientBoostingRegressor(**hp),
     }
     return makers[name]()
 
 
 CANDIDATES = ["persistence_baseline", "seasonal_naive_24h", "linear_regression", "ridge_regression",
-              "decision_tree", "knn", "svm", "random_forest", "hist_gradient_boosting"]
+              "decision_tree", "knn", "svm", "random_forest"]
 
 
 def tune(name: str, params: dict, cols: list[str], X, y) -> GridSearchCV:
@@ -152,15 +151,11 @@ def main() -> None:
         log.info("tuned %-18s %s  CV MAE=%.4f  val MAE %.4f -> %.4f", name, search.best_params_unprefixed,
                  tuning[name]["cv_mae"], results[name]["mae"], tuned_val["mae"])
 
-    # 3. Pick the best variant (default or tuned) on validation RMSE among the syllabus algorithms;
-    #    the best model overall is recorded for comparison only.
+    # 3. Pick the best variant (default or tuned) of any ML model on validation RMSE.
     variants = [(n, None, results[n]["rmse"]) for n in CANDIDATES if n not in ("persistence_baseline", "seasonal_naive_24h")]
     variants += [(n, t["best_params"], t["tuned_val"]["rmse"]) for n, t in tuning.items()]
-    overall = min(variants, key=lambda v: v[2])
-    allowed = params["selection"]["deployable"]
-    best, best_params, _ = min((v for v in variants if v[0] in allowed), key=lambda v: v[2])
-    log.info("Best model on validation: %s (%s); best overall incl. reference models: %s", best,
-             "tuned " + str(best_params) if best_params else "default", overall[0])
+    best, best_params, _ = min(variants, key=lambda v: v[2])
+    log.info("Best model on validation: %s (%s)", best, "tuned " + str(best_params) if best_params else "default")
 
     full = pd.concat([train, val])
     final = build(best, params, cols, best_params)
@@ -189,7 +184,6 @@ def main() -> None:
         "model_name": best,
         "hyperparameters": {**params["models"].get(best, {}), **(best_params or {})},
         "tuned": best_params is not None,
-        "selection": {"deployable": allowed, "best_overall": overall[0], "best_overall_val_rmse": overall[2]},
         "trained_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "mlflow_run_id": run_id,
         "features": cols,

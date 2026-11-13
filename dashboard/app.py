@@ -145,7 +145,7 @@ with tab_ops:
     digraph { rankdir=LR; node [shape=box style="rounded,filled" fillcolor="#eef3fa" fontname=Helvetica];
       A [label="UCI dataset\\n(2.07M rows)"]; B [label="Ingestion &\\nschema check"];
       C [label="Cleaning &\\nhourly resample"]; D [label="Feature\\nengineering"];
-      E [label="9 models + GridSearchCV\\n+ MLflow tracking"]; F [label="Model registry\\n(best model)"];
+      E [label="8 models + GridSearchCV\\n+ MLflow tracking"]; F [label="Model registry\\n(best model)"];
       G [label="Flask REST API\\n(Docker / K8s / Vercel)"]; H [label="Streamlit\\ndashboard"];
       I [label="Prometheus + Grafana\\nPSI drift, logs"]; J [label="GitHub Actions\\nCI: dvc repro + tests + build"];
       A->B->C->D->E->F->G->H; G->I; I->E [label="retrain trigger" style=dashed]; J->E [style=dashed];

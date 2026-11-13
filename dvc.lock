@@ -3,10 +3,14 @@ stages:
   ingest:
     cmd: python -m src.data_ingestion
     deps:
+    - path: data/household_power_consumption.csv.gz
+      hash: md5
+      md5: 5b8b86230ccf01a10bbb32e89fe04641
+      size: 18623523
     - path: src/data_ingestion.py
       hash: md5
-      md5: 5459ab68edcd4bdc68a2fc5a3d35b0a2
-      size: 2351
+      md5: c3c1f6ec98c0dc3e2556a89db95ed72f
+      size: 2879
     params:
       configs/params.yaml:
         data.url: 
@@ -87,8 +91,8 @@ stages:
       size: 2885
     - path: src/train.py
       hash: md5
-      md5: ba409a37542e19be18de5c195abb4ca0
-      size: 10668
+      md5: c5680c752b1800ae18bc0d5f28b7cebf
+      size: 10054
     params:
       configs/params.yaml:
         models:
@@ -107,12 +111,6 @@ stages:
             max_depth: 16
             min_samples_leaf: 5
             n_jobs: -1
-            random_state: 42
-          hist_gradient_boosting:
-            max_iter: 500
-            learning_rate: 0.05
-            max_leaf_nodes: 31
-            l2_regularization: 1.0
             random_state: 42
         split:
           train_end: '2009-12-31 23:00:00'
@@ -159,31 +157,22 @@ stages:
               - 1
               - 5
               - 20
-            hist_gradient_boosting:
-              learning_rate:
-              - 0.03
-              - 0.05
-              - 0.1
-              max_leaf_nodes:
-              - 15
-              - 31
-              - 63
     outs:
     - path: models/metadata.json
       hash: md5
-      md5: 51a105e12d06707cc66bca4980232bb2
-      size: 1798
+      md5: 92f44c6fe93faf2401d5dc329b5f3e3b
+      size: 1515
     - path: models/model.joblib
       hash: md5
       md5: 4e4ab1c16a5cce0b6cacb67bf36512bf
       size: 22452318
     - path: reports/metrics.json
       hash: md5
-      md5: 897aec0126555f8acc66d2285a0a8ac6
-      size: 5949
+      md5: 0bbc73f35e37ea55add05f7743f275b4
+      size: 5081
     - path: reports/test_predictions.parquet
       hash: md5
-      md5: 276ff3565352405727e065be774133d8
+      md5: 12119e15bbbd67aa9cee548b4a7aa02f
       size: 102344
   classify:
     cmd: python -m src.classify
@@ -194,17 +183,23 @@ stages:
       size: 4738712
     - path: reports/test_predictions.parquet
       hash: md5
-      md5: 276ff3565352405727e065be774133d8
+      md5: 12119e15bbbd67aa9cee548b4a7aa02f
       size: 102344
     - path: src/classify.py
       hash: md5
-      md5: c7f5f132cb39dfdc60b81d31e3bd56ab
-      size: 6283
+      md5: 064e398f03aab26f48f4e78acb1e73c2
+      size: 6352
     params:
       configs/params.yaml:
         classification:
           threshold_quantile: 0.75
           decision_tree:
+            random_state: 42
+          random_forest:
+            n_estimators: 200
+            min_samples_leaf: 5
+            class_weight: balanced
+            n_jobs: -1
             random_state: 42
           grid:
             max_depth:
@@ -228,16 +223,16 @@ stages:
     outs:
     - path: models/peak_classifier.joblib
       hash: md5
-      md5: 2f57a99f44687c2a76fae307f016e79b
-      size: 50169
+      md5: cac6dfed4b54c4a15992106f3a9be29a
+      size: 11812075
     - path: models/peak_classifier.json
       hash: md5
-      md5: 09e85bbafed090b0cefeec9bf3db2e59
-      size: 190
+      md5: 34ed19cd2959465bbe6c925c559cd664
+      size: 727
     - path: reports/classification.json
       hash: md5
-      md5: cd969e97ee1205c7c1c1d515cb8b96d7
-      size: 16026
+      md5: 9276cb3257c527e785ba053ade294ce0
+      size: 14397
   monitor:
     cmd: python -m src.monitor
     deps:
@@ -247,7 +242,7 @@ stages:
       size: 22452318
     - path: reports/test_predictions.parquet
       hash: md5
-      md5: 276ff3565352405727e065be774133d8
+      md5: 12119e15bbbd67aa9cee548b4a7aa02f
       size: 102344
     - path: src/monitor.py
       hash: md5
@@ -272,16 +267,16 @@ stages:
       size: 22452318
     - path: reports/classification.json
       hash: md5
-      md5: cd969e97ee1205c7c1c1d515cb8b96d7
-      size: 16026
+      md5: 9276cb3257c527e785ba053ade294ce0
+      size: 14397
     - path: reports/monitoring.json
       hash: md5
       md5: ce93f967e366a01e9f0bb7173d9aaf9c
       size: 424
     - path: src/evaluate.py
       hash: md5
-      md5: d691e9cd98375ce07a22483b20884201
-      size: 13661
+      md5: 0ade8b4aadc33e2331fd76fc35ae02ce
+      size: 13614
     outs:
     - path: reports/fairness.json
       hash: md5
@@ -289,8 +284,8 @@ stages:
       size: 1060
     - path: reports/figures
       hash: md5
-      md5: 309f683f8208b6d3125db733f0cf803d.dir
-      size: 810415
+      md5: 0b763570efbd19328cc826aef460f0af.dir
+      size: 803887
       nfiles: 17
   export_web:
     cmd: python -m src.export_web
@@ -301,8 +296,8 @@ stages:
       size: 22452318
     - path: reports/classification.json
       hash: md5
-      md5: cd969e97ee1205c7c1c1d515cb8b96d7
-      size: 16026
+      md5: 9276cb3257c527e785ba053ade294ce0
+      size: 14397
     - path: reports/monitoring.json
       hash: md5
       md5: ce93f967e366a01e9f0bb7173d9aaf9c
@@ -318,8 +313,8 @@ stages:
       size: 336866
     - path: web/public/data/dashboard.json
       hash: md5
-      md5: 54e5589a325eb118f04c54755d546f7d
-      size: 85555
+      md5: 187483bfa0d3db94a677804332e3d5a9
+      size: 83990
   analyze:
     cmd: python -m src.analysis
     deps:
@@ -337,25 +332,35 @@ stages:
       size: 22452318
     - path: models/peak_classifier.json
       hash: md5
-      md5: 09e85bbafed090b0cefeec9bf3db2e59
-      size: 190
+      md5: 34ed19cd2959465bbe6c925c559cd664
+      size: 727
     - path: reports/metrics.json
       hash: md5
-      md5: 897aec0126555f8acc66d2285a0a8ac6
-      size: 5949
+      md5: 0bbc73f35e37ea55add05f7743f275b4
+      size: 5081
     - path: src/analysis.py
       hash: md5
-      md5: a59aa27ceae9c9892ae5199c16a98c5b
-      size: 22630
+      md5: 9bf07b640e1236e033d1397bed569201
+      size: 22572
+    - path: src/predict.py
+      hash: md5
+      md5: 49aa8ef3cac350860c5ac866989c6de5
+      size: 3277
     - path: src/train.py
       hash: md5
-      md5: ba409a37542e19be18de5c195abb4ca0
-      size: 10668
+      md5: c5680c752b1800ae18bc0d5f28b7cebf
+      size: 10054
     params:
       configs/params.yaml:
         classification:
           threshold_quantile: 0.75
           decision_tree:
+            random_state: 42
+          random_forest:
+            n_estimators: 200
+            min_samples_leaf: 5
+            class_weight: balanced
+            n_jobs: -1
             random_state: 42
           grid:
             max_depth:
@@ -389,12 +394,6 @@ stages:
             max_depth: 16
             min_samples_leaf: 5
             n_jobs: -1
-            random_state: 42
-          hist_gradient_boosting:
-            max_iter: 500
-            learning_rate: 0.05
-            max_leaf_nodes: 31
-            l2_regularization: 1.0
             random_state: 42
         split:
           train_end: '2009-12-31 23:00:00'
@@ -441,22 +440,13 @@ stages:
               - 1
               - 5
               - 20
-            hist_gradient_boosting:
-              learning_rate:
-              - 0.03
-              - 0.05
-              - 0.1
-              max_leaf_nodes:
-              - 15
-              - 31
-              - 63
     outs:
     - path: reports/analysis
       hash: md5
-      md5: 6705e7ae35e99fd1a7cdf0346aa8d6df.dir
-      size: 1688558
+      md5: 47cfdcf08e71e77b1fcaa918d8dd5858.dir
+      size: 1620282
       nfiles: 19
     - path: reports/analysis.json
       hash: md5
-      md5: 69eb4fae9388d36870388154780afa39
-      size: 23458
+      md5: 0f5c27ba47a9c60c48bc6c2b3cf0a6f6
+      size: 22176

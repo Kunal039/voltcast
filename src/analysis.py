@@ -1,7 +1,7 @@
 """Stage 8 - Extended analysis for the report: every model on the test set, extra metrics, curves.
 
 Produces reports/analysis.json and the figures in reports/analysis/:
-  * test-set scores of all nine regressors (default and tuned), with accuracy-style metrics
+  * test-set scores of all eight regressors (default and tuned), with accuracy-style metrics
   * per-model forecast, scatter and residual plots
   * error by forecast horizon (1-24 h ahead) for the deployed recursive forecaster
   * learning curves, cross-validation fold scores and hyper-parameter response curves
@@ -17,7 +17,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from sklearn.linear_model import LogisticRegression, Ridge
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import Ridge
 from sklearn.metrics import (classification_report, confusion_matrix, explained_variance_score, max_error,
                              median_absolute_error, precision_recall_curve, roc_auc_score, roc_curve)
 from sklearn.model_selection import GridSearchCV, TimeSeriesSplit, cross_validate, learning_curve
@@ -41,7 +42,7 @@ LABELS = {
     "persistence_baseline": "Persistence baseline", "seasonal_naive_24h": "Seasonal naive (24 h)",
     "linear_regression": "Linear regression", "ridge_regression": "Ridge regression",
     "decision_tree": "Decision tree", "knn": "K-nearest neighbours", "svm": "SVM (SVR)",
-    "random_forest": "Random forest", "hist_gradient_boosting": "Gradient boosting",
+    "random_forest": "Random forest",
 }
 
 
@@ -168,7 +169,7 @@ def learning_curves(params, cols, train):
     X, y = train[cols].values, train["target"].values
     cv = TimeSeriesSplit(n_splits=5)
     picks = [("linear_regression", None), ("decision_tree", None), ("random_forest", {"n_estimators": 100}),
-             ("hist_gradient_boosting", None)]
+             ("knn", None)]
     fig, axes = plt.subplots(1, 4, figsize=(11, 3.2), sharey=True)
     out = {}
     for ax, (n, hp) in zip(axes, picks):
@@ -245,11 +246,11 @@ def classification_analysis(params, cols, train, val, test):
     thr = float(train["target"].quantile(cp["threshold_quantile"]))
     lab = lambda d: (d["target"] > thr).astype(int).values
     X, y, Xv, yv, Xt, yt = train[cols].values, lab(train), val[cols].values, lab(val), test[cols].values, lab(test)
-    tuned_params = json.loads((ROOT / "models" / "peak_classifier.json").read_text())["hyperparameters"]
+    tuned_params = json.loads((ROOT / "models" / "peak_classifier.json").read_text())["tuned_tree_params"]
     models = {
-        "Logistic regression": make_pipeline(StandardScaler(), LogisticRegression(max_iter=2000)),
         "Decision tree (default)": DecisionTreeClassifier(random_state=42),
         "Decision tree (tuned)": DecisionTreeClassifier(random_state=42, **tuned_params),
+        "Random forest": RandomForestClassifier(**cp["random_forest"]),
     }
     full = pd.concat([train, val])
     out = {"threshold_kw": thr, "classifiers": {}}

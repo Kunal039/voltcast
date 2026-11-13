@@ -46,8 +46,7 @@ export default function Forecast({ range }) {
         { x: xs, y: f.map((p) => p.predicted_kw), name: "Forecast", line: { color: COLORS.orange, width: 3 } },
         { x: f.filter((p) => p.peak_alert).map((p) => p.timestamp), y: f.filter((p) => p.peak_alert).map((p) => p.predicted_kw),
           name: "Peak-hour alert", mode: "markers", marker: { color: "#b42318", size: 9, symbol: "triangle-up" },
-          customdata: f.filter((p) => p.peak_alert).map((p) => (p.alert_method === "classifier"
-            ? `classifier: ${(p.peak_probability * 100).toFixed(0)}% peak probability` : "forecast above peak threshold")),
+          customdata: f.filter((p) => p.peak_alert).map((p) => `${(p.peak_probability * 100).toFixed(0)}% peak probability`),
           hovertemplate: "Peak-hour alert<br>%{customdata}<extra></extra>" },
       ],
       layout: {

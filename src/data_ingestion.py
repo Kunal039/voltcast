@@ -1,10 +1,14 @@
-"""Stage 1 - Data ingestion: download the UCI dataset once, store it as a clean CSV, validate its schema.
+"""Stage 1 - Data ingestion: get the UCI dataset as a clean CSV and validate its schema.
 
-The UCI archive holds a semicolon-separated .txt with '?' for missing readings and
+The repository ships the dataset as data/household_power_consumption.csv.gz (18.6 MB,
+GitHub does not accept the 115 MB CSV); it is decompressed on first run. Without it,
+the original archive is downloaded from UCI. The UCI archive holds a semicolon-separated .txt with '?' for missing readings and
 separate Date/Time columns. It is converted to a standard CSV with one Datetime
 column and blank cells for missing values; the downloaded archive is not kept.
 """
+import gzip
 import io
+import shutil
 import tempfile
 import zipfile
 from pathlib import Path
@@ -26,6 +30,12 @@ def download(params: dict) -> None:
     csv_path = resolve(params["data"]["raw_csv"])
     if csv_path.exists():
         log.info("Dataset already present at %s - skipping download", csv_path)
+        return
+    bundled = csv_path.with_name(csv_path.name + ".gz")
+    if bundled.exists():
+        with gzip.open(bundled, "rb") as src, open(csv_path, "wb") as dst:
+            shutil.copyfileobj(src, dst, 1 << 20)
+        log.info("Decompressed bundled dataset %s -> %s", bundled.name, csv_path)
         return
     log.info("Downloading dataset from %s", params["data"]["url"])
     with tempfile.TemporaryDirectory() as tmp:

@@ -23,6 +23,8 @@ STUDENTS = ["Kunal Mittal (24BCS12354)", "Ansh Kumar (24BCS12097)",
 DEGREE = "BACHELOR OF ENGINEERING"
 BRANCH = "COMPUTER SCIENCE & ENGINEERING"
 MONTH_YEAR = "November 2026"
+LIVE_URL = "https://voltcast-forecast.vercel.app"
+REPO_URL = "https://github.com/Kunal039/voltcast"
 
 metrics = json.loads((ROOT / "reports" / "metrics.json").read_text())
 meta = json.loads((ROOT / "models" / "metadata.json").read_text())
@@ -249,7 +251,9 @@ para(DEGREE, 16, True, align=C, after=6)
 para("IN", 14, align=C, after=6)
 para(BRANCH, 14, align=C, after=60)
 para("Chandigarh University", 14, True, align=C, after=6)
-para(MONTH_YEAR, 14, align=C)
+para(MONTH_YEAR, 14, align=C, after=18)
+para(f"Live deployment: {LIVE_URL}", 11, align=C, after=2)
+para(f"GitHub repository: {REPO_URL}", 11, align=C)
 
 # ---------- bonafide certificate ----------
 page_break()
@@ -315,7 +319,9 @@ CT, CR = clf["test"], clf["forecast_threshold_rule_test"]
 LBL = {"persistence_baseline": "Persistence baseline", "seasonal_naive_24h": "Seasonal naive (24 h)",
        "linear_regression": "Linear regression", "ridge_regression": "Ridge regression",
        "decision_tree": "Decision tree", "knn": "K-nearest neighbours (KNN)", "svm": "Support vector machine (SVR)",
-       "random_forest": "Random forest", "hist_gradient_boosting": "Histogram gradient boosting"}
+       "random_forest": "Random forest"}
+CLF_LBL = {"decision_tree_default": "Decision tree (default)", "decision_tree_tuned": "Decision tree (tuned)",
+           "random_forest": "Random forest classifier"}
 nf = lambda k=1: f"{fig_no['ch']}.{fig_no['fig'] + k}"   # number the next figure will get
 nt = lambda k=1: f"{fig_no['ch']}.{fig_no['tab'] + k}"   # number the next table will get
 CANDIDATES_ORDER = list(V)
@@ -332,15 +338,13 @@ para("Residential buildings account for a large share of national electricity de
 para(f"The UCI “Individual Household Electric Power Consumption” dataset ({stats['raw_rows']:,} one-minute "
      f"readings over almost four years) is cleaned of {stats['raw_missing_pct']}% missing values, checked for "
      f"outliers, resampled to {stats['hourly_rows']:,} hourly records and turned into 31 leakage-free features. "
-     "Nine regression models covering the algorithms of the course (linear regression, decision tree, k-nearest "
-     "neighbours, support vector machine, random forest) plus ridge regression, gradient boosting and two naive "
-     "baselines are trained on a chronological split, tuned with GridSearchCV using time-series cross-validation, "
-     "and tracked in MLflow. Only syllabus algorithms are eligible for deployment, and the best of them, "
-     f"random forest, is deployed: test MAE {T['mae']:.3f} kW, MSE {T['mse']:.3f}, R² {T['r2']:.3f}, "
-     f"accuracy (1 − WAPE) {AN['test_all_models'][meta['model_name']]['accuracy_1_minus_wape'] * 100:.1f}%, a "
-     f"{MAE_GAIN:.1f}% MAE reduction over the persistence baseline and within "
-     f"{abs(AN['test_all_models']['hist_gradient_boosting']['mae'] - T['mae']):.3f} kW of the best reference model "
-     f"(gradient boosting). A tuned decision-tree classifier detects peak hours with {CT['accuracy']*100:.1f}% "
+     "Only algorithms from the MLOps-1 syllabus are used: linear and ridge regression, decision tree, k-nearest "
+     "neighbours, support vector machine and random forest, compared with two naive baselines on a chronological "
+     "split, tuned with GridSearchCV using time-series cross-validation, and tracked in MLflow. The best model, "
+     f"{LBL[meta['model_name']].lower()}, is deployed: test MAE {T['mae']:.3f} kW, MSE {T['mse']:.3f}, "
+     f"R² {T['r2']:.3f}, accuracy (1 − WAPE) {AN['test_all_models'][meta['model_name']]['accuracy_1_minus_wape'] * 100:.1f}%, "
+     f"a {MAE_GAIN:.1f}% MAE reduction over the persistence baseline. A {CLF_LBL[clf['selected']].lower()} detects "
+     f"peak hours with {CT['accuracy']*100:.1f}% "
      f"accuracy, {CT['recall']*100:.1f}% recall and ROC-AUC {CT['roc_auc']:.3f}. The experiments also show "
      f"over-fitting clearly: the default decision tree reaches zero training error but the worst validation "
      f"error, which tuning reduces from {DT['default_val']['mae']:.3f} to {DT['tuned_val']['mae']:.3f} kW.")
@@ -352,6 +356,7 @@ para("The models are versioned with DVC and the MLflow model registry, and serve
      "monitor based on the Population Stability Index correctly detected seasonal drift and recommended "
      "retraining. Fairness, transparency, privacy and security are analysed, including error across groups "
      "of hours.")
+para("**Live deployment:** https://voltcast-forecast.vercel.app    **Source code:** https://github.com/Kunal039/voltcast", align=WD_ALIGN_PARAGRAPH.LEFT)
 para("Keywords: load forecasting, smart meter, random forest, decision tree, GridSearchCV, MLOps, MLflow, "
      "DVC, Flask, Docker, Prometheus, Grafana, responsible AI.", italic=True)
 
@@ -366,7 +371,7 @@ table(["Abbreviation", "Full form"], [
     ["CT", "Continuous Training"], ["CV", "Cross-Validation"], ["CNN", "Convolutional Neural Network"],
     ["DVC", "Data Version Control"], ["EDA", "Exploratory Data Analysis"],
     ["FN / FP / TN / TP", "False negative / false positive / true negative / true positive"],
-    ["HGB", "Histogram-based Gradient Boosting"], ["IEA", "International Energy Agency"],
+    ["IEA", "International Energy Agency"], ["ER", "Entity-Relationship"],
     ["IQR", "Inter-Quartile Range"], ["K8s", "Kubernetes"], ["KNN", "K-Nearest Neighbours"],
     ["kW / kWh", "Kilowatt / Kilowatt-hour"], ["LSTM", "Long Short-Term Memory"],
     ["MAE", "Mean Absolute Error"], ["MAPE", "Mean Absolute Percentage Error"], ["ML", "Machine Learning"],
@@ -386,7 +391,6 @@ table(["Symbol", "Meaning"], [
     ["μ_w, σ_w", "Rolling mean and standard deviation over the previous w hours"],
     ["n", "Number of evaluation samples"],
     ["α", "Ridge regularisation strength"],
-    ["η", "Learning rate of gradient boosting"],
     ["k", "Number of neighbours in KNN"],
     ["C, ε", "SVR penalty and epsilon-insensitive margin"],
     ["σ_r", "Standard deviation of test residuals (used for prediction intervals)"],
@@ -431,18 +435,40 @@ table(["#", "Task", "Output", "Chapter"], [
     ["T2", "Selection of a public, realistic smart-meter dataset and EDA", "Data understanding, figures", "3.1"],
     ["T3", "Design of features, constraints (incl. ethics) and alternative designs", "Selected design", "3"],
     ["T4", "Data pipeline: ingestion, cleaning, outliers, resampling, features, versioning with DVC", "Versioned datasets", "3.6, 4.1"],
-    ["T5", "Model development: 9 algorithms, GridSearchCV tuning, over-fitting analysis, MLflow registry", "Registered forecaster", "4.1"],
+    ["T5", "Model development: 6 syllabus algorithms, GridSearchCV tuning, over-fitting analysis, MLflow registry", "Registered forecaster", "4.1"],
     ["T6", "Peak-hour classifier with accuracy, precision, recall, F1, ROC", "Peak alert model", "4.1"],
     ["T7", "Deployment: Flask REST API, Docker, Kubernetes, Vercel cloud, React web app", "Running services", "4.1"],
     ["T8", "Automation and operations: CI/CD, tests, Prometheus, Grafana, logging, drift monitoring", "CI pipeline, dashboards", "4.1"],
     ["T9", "Responsible-AI analysis: fairness, transparency, privacy, security", "Model card, bias analysis", "3.2, 4.1"],
     ["T10", "Validation, documentation, report and user manual", "This report", "4, 5, Manual"],
 ], "Identified tasks", [1.0, 7.3, 4.2, 2.0])
+para(f"**Work distribution, roles and responsibilities.** The work was divided among the three team members by "
+     f"area of the system (Table {nt()}); all members took part in the design, testing, report and viva preparation.")
+table(["Member", "Role", "Responsibilities", "Tasks"], [
+    ["Kunal Mittal (24BCS12354)", "Data & ML lead", "Dataset selection and analysis, ingestion, preprocessing, "
+     "feature engineering, training and tuning of all syllabus algorithms, peak-hour classifier, evaluation and "
+     "extended analysis", "T2, T4, T5, T6"],
+    ["Ansh Kumar (24BCS12097)", "Deployment lead", "Flask REST API, React web application, Streamlit dashboard, "
+     "Docker image and Compose stack, Vercel cloud deployment, Kubernetes manifests", "T7"],
+    ["Vishal Kumar Shrivastava (24BCS12629)", "MLOps & QA lead", "GitHub Actions CI/CD, DVC pipeline and "
+     "versioning, MLflow registry, Prometheus and Grafana monitoring, automated tests, responsible-AI analysis, "
+     "report and user manual", "T8, T9, T10"],
+    ["All members", "Shared", "Problem study and literature survey, design reviews, testing sessions, "
+     "presentation and viva preparation", "T1, T3, T10"],
+], "Work distribution, roles and responsibilities", [4.0, 2.4, 6.6, 2.0])
 
 heading("1.4. Timeline", 2)
 para(f"The project was executed over twelve weeks. Figure {nf()} shows the Gantt chart; tasks overlap where the "
      "pipeline allowed parallel work (for example, the web application was built while CI was configured).")
 figure(DIAG / "fig_gantt.png", "Gantt chart of the project timeline")
+table(["Milestone", "Week", "Deliverable"], [
+    ["M1 Proposal and design approved", "3", "Problem statement, objectives, dataset, system design"],
+    ["M2 Data pipeline complete", "4", "Clean hourly data, 31 features, DVC stages"],
+    ["M3 Models trained and tuned", "6", "All syllabus algorithms compared in MLflow, best model registered"],
+    ["M4 Working prototype", "8", "Flask API, Docker image, React web app"],
+    ["M5 Automation and monitoring", "10", "CI/CD pipeline, Prometheus and Grafana, drift monitor, tests"],
+    ["M6 Final system and report", "12", "Cloud deployment, final report, presentation, live demonstration"],
+], "Project milestones", [5.6, 1.4, 8.0])
 
 heading("1.5. Organization of the Report", 2)
 bullets([
@@ -521,14 +547,9 @@ para("**Support vector machine for regression (SVR).** Fits a function that stay
 para("**Random forest.** Averages many decision trees, each grown on a bootstrap sample of the rows and choosing "
      "each split from a random subset of features (bagging) [8]. Averaging de-correlated trees reduces variance "
      "sharply, so the forest generalises far better than a single tree while keeping its non-linearity.")
-para("**Gradient boosting.** Builds trees sequentially; each new tree is fitted to the residual errors (the "
-     "negative gradient of the loss) of the current ensemble, and its prediction is added with a small learning "
-     "rate η [9]. The histogram variant bins each feature into at most 255 values, which makes split finding very "
-     "fast on tens of thousands of rows [18]. Boosting reduces bias step by step, while the learning rate, number of "
-     "leaves and L2 penalty control over-fitting.")
-para("**Logistic regression.** For the peak-hour classifier, models the probability of the positive class as "
-     "σ(w·x + b), where σ is the sigmoid function, and is fitted by maximising the log-likelihood. It serves as the "
-     "linear reference for the decision-tree classifier.")
+para("**Random forest classifier.** The same bagging idea applied to classification: each tree votes for a "
+     "class and the forest returns the share of votes as a probability. It is compared with the single "
+     "decision tree for the peak-hour alert.")
 para("**Model evaluation.** Because the data is a time series, ordinary k-fold cross-validation would train on "
      "the future and test on the past. TimeSeriesSplit instead creates expanding windows: fold 1 trains on the "
      "first sixth of the training period and validates on the next sixth, fold 5 trains on five sixths and "
@@ -603,7 +624,7 @@ table(["Course outcome", "How the project addresses it", "Section"], [
      "real energy-sector problem; algorithm survey", "1.1, 2.2"],
     ["CO2: Preprocessing, feature engineering, data handling", "Missing values, IQR outliers, resampling, "
      "scaling, 31 engineered features, chronological split", "3.1, 3.3, 4.1"],
-    ["CO3: Develop and evaluate models with various algorithms", "9 regressors and 3 classifiers, "
+    ["CO3: Develop and evaluate models with various algorithms", "6 syllabus regressors (+2 baselines) and 3 classifiers, "
      "GridSearchCV with time-series CV, over/under-fitting analysis, MSE/MAE/R² and accuracy/precision/"
      "recall/F1/ROC", "3.6, 4.1"],
     ["CO4: Deploy with APIs, microservices and cloud", "Flask REST API, Docker Compose microservices, "
@@ -624,6 +645,19 @@ para(f"**Dataset.** The UCI dataset [10] contains {stats['raw_rows']:,} one-minu
 figure(FIG / "fig_eda_timeseries.png", "Daily mean active power with 30-day rolling mean (strong yearly seasonality)")
 figure(FIG / "fig_eda_heatmap.png", "Average consumption by weekday and hour (morning and evening peaks)")
 figure(FIG / "fig_eda_month_submeter.png", "Monthly pattern and share of energy per sub-meter")
+para(f"Table {nt()} describes every column of the dataset as stored in data/household_power_consumption.csv "
+     "(also shipped compressed in the repository as household_power_consumption.csv.gz, 18.6 MB).")
+table(["Column", "Unit", "Description"], [
+    ["Datetime", "–", "Timestamp of the one-minute reading (16 Dec 2006 17:24 to 26 Nov 2010 21:02)"],
+    ["Global_active_power", "kW", "Household active power averaged over the minute (forecast target, hourly mean)"],
+    ["Global_reactive_power", "kW", "Household reactive power averaged over the minute"],
+    ["Voltage", "V", "Average voltage over the minute"],
+    ["Global_intensity", "A", "Average current intensity over the minute"],
+    ["Sub_metering_1", "Wh", "Kitchen: dishwasher, oven, microwave"],
+    ["Sub_metering_2", "Wh", "Laundry room: washing machine, tumble drier, refrigerator, light"],
+    ["Sub_metering_3", "Wh", "Electric water heater and air conditioner"],
+    ["Sub_metering_other (derived)", "Wh", "Active energy not measured by the three sub-meters (computed in preprocessing)"],
+], "Dataset dictionary", [4.6, 1.2, 9.2])
 para("The EDA shows a strong winter peak (consumption roughly doubles from August to December), two daily "
      "peaks around 07:00 and 20:00–21:00, higher daytime use at weekends, and an August holiday dip.")
 para(f"Figures {nf()}–{nf(7)} extend the analysis. Missing readings are concentrated in a few months, the worst "
@@ -737,6 +771,23 @@ heading("3.6. Implementation plan/methodology", 2)
 para(f"Figure {nf()} shows the algorithm executed by the pipeline and Figure {nf(2)} the detailed block diagram.")
 figure(DIAG / "fig_flowchart.png", "Flowchart of the training and deployment algorithm", 10)
 figure(DIAG / "fig_architecture.png", "Detailed block diagram of the MLOps architecture")
+para(f"**Technology stack.** Table {nt()} lists the technologies used and where each one appears in the course.")
+table(["Layer", "Technology", "Purpose", "Syllabus link"], [
+    ["Language", "Python 3, JavaScript", "Pipeline, models, API; web front end", "Pre-requisite: Python"],
+    ["Data", "pandas, NumPy, PyArrow", "Loading, cleaning, resampling, features", "Unit 2: data preprocessing"],
+    ["Machine learning", "scikit-learn", "Linear/ridge regression, decision tree, KNN, SVM, random forest, "
+     "GridSearchCV, metrics", "Units 1–2, Exp. 2–4"],
+    ["Versioning", "Git, GitHub, DVC", "Code, data and pipeline versioning", "Exp. 5, Exp. 9"],
+    ["Experiment tracking", "MLflow", "Runs, metrics, model registry", "Unit 3: model versioning"],
+    ["Serving", "Flask, gunicorn, Pydantic", "REST API with validation", "Exp. 7"],
+    ["Containers", "Docker, Docker Compose", "Image and multi-service stack", "Exp. 6"],
+    ["Orchestration", "Kubernetes manifests", "Replicated deployment, autoscaling", "Project-based learning 4"],
+    ["CI/CD", "GitHub Actions, Vercel", "Automated pipeline, tests, build, deployment", "Exp. 8"],
+    ["Cloud", "Vercel (serverless functions on AWS)", "Public deployment of web app and API", "Unit 3: cloud deployment"],
+    ["Monitoring", "Prometheus, Grafana, JSON logs", "Service metrics, dashboards, prediction log", "Exp. 7, Exp. 10"],
+    ["Visualisation", "React, Plotly, Streamlit, Matplotlib", "Web app, dashboard, report figures", "Results presentation"],
+    ["Testing", "pytest", "Unit, API and quality-gate tests", "Exp. 8"],
+], "Technology stack", [2.8, 3.6, 5.6, 3.0])
 para(f"The system is further described by a context data-flow diagram (Figure {nf()}), a level-1 data-flow "
      f"diagram showing processes and data stores (Figure {nf(2)}), a use-case diagram (Figure {nf(3)}), a "
      f"sequence diagram of a forecast request (Figure {nf(4)}), the deployment diagram (Figure {nf(5)}), the "
@@ -748,6 +799,12 @@ figure(DIAG / "sequence_forecast.png", "Sequence diagram: serving a forecast req
 figure(DIAG / "deployment.png", "Deployment diagram: Docker Compose, Vercel and Kubernetes", 15.5)
 figure(DIAG / "cicd.png", "CI/CD pipeline", 15.5)
 figure(DIAG / "dvc_dag.png", "DVC pipeline graph", 15)
+para(f"**Data model.** VoltCast does not need a relational database for its predictions, but it stores structured "
+     f"data in files and in MLflow's SQLite database. Figure {nf()} shows these entities and their relationships: "
+     "minute readings aggregate 60:1 into hourly records, each hourly record yields one feature row, MLflow "
+     "experiments contain runs with parameters and metrics, and each registered model version points to the "
+     "run that produced it.")
+figure(DIAG / "er_diagram.png", "Entity-relationship diagram", 16)
 para(f"Each pipeline stage follows its own algorithm, shown as flowcharts in Figures {nf()}–{nf(5)}.")
 figure(DIAG / "flow_preprocess.png", "Flowchart of the preprocessing stage", 10)
 figure(DIAG / "flow_training.png", "Flowchart of the training and tuning stage", 10.5)
@@ -762,21 +819,18 @@ para("**Data split.** To respect time ordering, data is split chronologically: t
 para("**Regression models.** Persistence (ŷₜ = yₜ₋₁) and seasonal-naive (ŷₜ = yₜ₋₂₄) "
      "baselines; linear regression and ridge regression (standardised inputs); decision tree; k-nearest "
      "neighbours (k = 10, standardised); support vector regression (RBF kernel, C = 1, ε = 0.1, standardised); "
-     "random forest (200 trees, depth 16, minimum 5 rows per leaf) [8]; and, as a reference model outside "
-     "the syllabus, histogram gradient boosting (500 iterations, η = 0.05, "
-     "31 leaves) [9], [18]. All are implemented with scikit-learn [20].")
-para("**Model selection rule.** All models are compared, but only the algorithms of the MLOps-1 syllabus "
-     "(linear and ridge regression, decision tree, KNN, SVM and random forest) may be deployed. Among them the "
-     "variant (default or tuned) with the lowest validation RMSE is chosen. Gradient boosting and the two naive "
-     "baselines are reported as reference points, so the cost of this rule can be measured (Section 4.1.5).")
+     "random forest (200 trees, depth 16, minimum 5 rows per leaf) [8]. Only algorithms from the course "
+     "syllabus are used. All are implemented with scikit-learn [20].")
+para("**Model selection rule.** Among the six syllabus algorithms, the variant (default or tuned) with the "
+     "lowest validation RMSE is deployed. The two naive baselines show how much the models add.")
 para("**Hyper-parameter tuning.** GridSearchCV searches the grids in params.yaml using TimeSeriesSplit with "
      "five folds, so every fold trains on the past and validates on the following period, which is the "
      "time-series form of cross-validation [21]. Tuned and default variants are both compared on the "
      "validation window; regularisation is controlled through ridge α, tree depth and minimum leaf size.")
 para("**Peak-hour classification.** An hour is labelled a peak hour when consumption exceeds "
-     f"τ = {clf['threshold_kw']:.2f} kW, the 75th percentile of training consumption. Logistic regression, a "
-     "default decision tree and a GridSearchCV-tuned decision tree (F1 scoring, balanced class weights "
-     "allowed) are compared on validation F1.")
+     f"τ = {clf['threshold_kw']:.2f} kW, the 75th percentile of training consumption. A default decision tree, "
+     "a GridSearchCV-tuned decision tree (F1 scoring, balanced class weights allowed) and a random forest "
+     "classifier are compared on validation F1.")
 para("**Metrics.** Regression: MAE = (1/n)Σ|yₜ − ŷₜ|, MSE = (1/n)Σ(yₜ − ŷₜ)², RMSE = √MSE, "
      "R² and MAPE; RMSE selects the model because peak errors matter most for demand response. "
      "Classification: accuracy = (TP+TN)/n, precision = TP/(TP+FP), recall = TP/(TP+FN), F1 = harmonic mean "
@@ -789,7 +843,7 @@ table(["Module", "Responsibility"], [
     ["src/data_ingestion.py", "Download the UCI archive, convert to CSV, verify schema"],
     ["src/preprocess.py", "Parse, fill gaps, resample hourly, IQR outlier report"],
     ["src/features.py", "Build 31 leakage-free features"],
-    ["src/train.py", "9 regressors, GridSearchCV, MLflow tracking and model registry"],
+    ["src/train.py", "6 syllabus regressors + 2 baselines, GridSearchCV, MLflow tracking and registry"],
     ["src/classify.py", "Peak-hour classifier and classification metrics"],
     ["src/monitor.py", "PSI drift and performance degradation, retraining decision"],
     ["src/evaluate.py", "EDA, diagnostics, validation curve, classification and bias figures"],
@@ -820,7 +874,7 @@ para(f"{stats['raw_missing_pct']}% of minute readings were missing ('?'). After 
 figure(FIG / "fig_eda_correlation.png", "Correlation matrix of the measured variables", 12)
 
 heading("4.1.2. Model development and comparison", 3)
-para(f"Table {nt()} compares all nine regression models with default hyper-parameters; every run is logged in "
+para(f"Table {nt()} compares all eight regression models with default hyper-parameters; every run is logged in "
      f"MLflow (Figure {nf(2)} in this section shows the tracking UI).")
 rows = []
 for n, m in V.items():
@@ -831,11 +885,9 @@ table(["Model", "Train MAE", "Val MAE", "Val MSE", "Val RMSE", "Val R²", "Fit (
       "Training and validation performance of all models (default hyper-parameters)", [4.8, 1.7, 1.7, 1.7, 1.8, 1.6, 1.4])
 figure(FIG / "fig_model_comparison.png", "Validation MAE and R² of all models (deployed model in orange, baselines in grey)")
 figure(SHOT / "mlflow.png", "MLflow tracking UI: runs of every model, tuned variant and final model", 15)
-para(f"Among the syllabus algorithms, random forest has the lowest validation RMSE "
-     f"({V['random_forest']['rmse']:.3f} kW), followed by the SVM ({V['svm']['rmse']:.3f} kW); it is therefore the "
-     f"deployed model. The reference gradient-boosting model is slightly lower still "
-     f"({V['hist_gradient_boosting']['rmse']:.3f} kW), a difference of "
-     f"{V['random_forest']['rmse'] - V['hist_gradient_boosting']['rmse']:.3f} kW. Linear and ridge regression are identical at α = 1 and "
+para(f"{LBL[meta['model_name']]} has the lowest validation RMSE ({V[meta['model_name']]['rmse']:.3f} kW), "
+     f"followed by the SVM ({V['svm']['rmse']:.3f} kW), so it is the deployed model. "
+     f"Linear and ridge regression are identical at α = 1 and "
      f"form a strong linear reference (R² {V['linear_regression']['r2']:.3f}). The seasonal-naive model has "
      "negative R²: yesterday's same hour is a worse predictor than the mean, which confirms that household "
      "load is driven by irregular routines.")
@@ -853,9 +905,9 @@ lc = AN["learning_curves"]
 para(f"Learning curves (Figure {nf()}) show how training and cross-validation error change as the models see more "
      "history. For linear regression both curves meet quickly at a high error, the signature of under-fitting "
      "(more data does not help). The unrestricted decision tree keeps a near-zero training error and a large gap, "
-     "the signature of over-fitting. Random forest and gradient boosting narrow the gap as data grows "
-     f"(gradient boosting CV MAE {lc['hist_gradient_boosting']['cv_mae'][0]:.3f} → "
-     f"{lc['hist_gradient_boosting']['cv_mae'][-1]:.3f} kW), so more historical data would still help them.")
+     "the signature of over-fitting. Random forest narrows the gap as data grows "
+     f"(CV MAE {lc['random_forest']['cv_mae'][0]:.3f} → {lc['random_forest']['cv_mae'][-1]:.3f} kW), so more "
+     "historical data would still help it; KNN behaves similarly but at a higher error level.")
 figure(AFIG / "learning_curves.png", "Learning curves with time-series cross-validation", 16)
 
 heading("4.1.4. Hyper-parameter tuning with GridSearchCV", 3)
@@ -884,7 +936,7 @@ para(f"Tuning helps most where the default was poorly regularised: the decision 
      f"{DT['default_val']['mae']:.3f} to {DT['tuned_val']['mae']:.3f} kW once depth and minimum leaf size are "
      f"limited. KNN gains by averaging over more neighbours with distance weighting; ridge prefers strong "
      f"regularisation (α = {TUN['ridge_regression']['best_params']['alpha']}) but gains little. For random forest "
-     "and gradient boosting the defaults were already well chosen, and the small differences are within the "
+     "the defaults were already well chosen, and the small difference is within the "
      "noise between cross-validation and the validation window. The default random forest (200 trees, depth 16, "
      "minimum 5 rows per leaf) therefore remains the selected model.")
 
@@ -919,12 +971,9 @@ para(f"Accuracy-style metrics make the regression results easier to read. Accura
      f"{best_t['accuracy_1_minus_wape'] * 100:.1f}% for the deployed model against "
      f"{TA['persistence_baseline']['accuracy_1_minus_wape'] * 100:.1f}% for persistence. "
      f"{best_t['within_0_25kw_pct']:.1f}% of hourly forecasts are within ±0.25 kW of the actual value and "
-     f"{best_t['within_0_5kw_pct']:.1f}% within ±0.5 kW. The ranking on the test set matches validation: random "
-     "forest is the best syllabus algorithm, ahead of the SVM, and the reference gradient-boosting model is better "
-     f"by only {best_t['mae'] - TA['hist_gradient_boosting']['mae']:.4f} kW MAE "
-     f"({(TA['hist_gradient_boosting']['accuracy_1_minus_wape'] - best_t['accuracy_1_minus_wape']) * 100:.1f} "
-     "percentage points of accuracy). Restricting deployment to syllabus algorithms therefore costs almost nothing, "
-     "and the selection was not a lucky choice.")
+     f"{best_t['within_0_5kw_pct']:.1f}% within ±0.5 kW. The ranking on the test set matches validation: "
+     f"{LBL[meta['model_name']].lower()} is best, ahead of the SVM, and the tuned variants rank as on validation. "
+     "This confirms the selection was not a lucky choice.")
 figure(AFIG / "test_metrics_all_models.png", "Test MAE, RMSE, R² and accuracy (1 − WAPE) of every model", 16)
 para(f"Figures {nf()}–{nf(3)} show the behaviour of each model on the test set: a week of forecasts, the "
      "predicted-vs-actual scatter, and the residual distribution.")
@@ -964,10 +1013,12 @@ table(["Classifier", "Train F1", "Accuracy", "Precision", "Recall", "F1", "ROC-A
         f"{s['recall']:.3f}", f"{s['f1']:.3f}", f"{s['roc_auc']:.3f}"] for n, s in cv.items()],
       "Peak-hour classifiers on the validation set", [4.4, 1.6, 1.7, 1.7, 1.6, 1.4, 1.8])
 bp = clf["best_params"]
+sel = clf["selected"]
 para(f"The default decision tree again over-fits (training F1 {cv['decision_tree_default']['train_f1']:.2f}). "
      f"GridSearchCV selects max_depth = {bp['max_depth']}, min_samples_leaf = {bp['min_samples_leaf']} and "
      f"class_weight = {bp['class_weight']}, raising validation F1 from {cv['decision_tree_default']['f1']:.3f} "
-     f"to {cv['decision_tree_tuned']['f1']:.3f}, so the tuned tree is selected. On the test period it reaches "
+     f"to {cv['decision_tree_tuned']['f1']:.3f}; the random forest classifier reaches {cv['random_forest']['f1']:.3f}. "
+     f"The {CLF_LBL[sel].lower()} has the best validation F1 and is selected. On the test period it reaches "
      f"accuracy {CT['accuracy']:.3f}, precision {CT['precision']:.3f}, recall {CT['recall']:.3f}, F1 "
      f"{CT['f1']:.3f} and ROC-AUC {CT['roc_auc']:.3f} (Figure {nf()}).")
 figure(FIG / "fig_classification.png", "Peak-hour classifier on the test set: confusion matrix, ROC and precision-recall curves")
@@ -989,8 +1040,8 @@ for name, c in CA.items():
 table(["Classifier", "Class", "Precision", "Recall", "F1-score", "Support"], rows,
       "Classification reports on the test set", [4.4, 3.0, 1.9, 1.9, 1.9, 1.9])
 sw = AN["classification"]["threshold_sweep"]
-para(f"The tuned tree outputs a probability; the alert uses 0.5 as the cut-off. Figure {nf()} and Table {nt()} show "
-     "the trade-off for other cut-offs: a lower threshold catches more peaks (recall) but raises more false "
+para(f"Every classifier outputs a probability, and the alert uses 0.5 as the cut-off. Using the tuned decision "
+     f"tree of Experiments 3 and 4 as the example, Figure {nf()} and Table {nt()} show the trade-off for other cut-offs: a lower threshold catches more peaks (recall) but raises more false "
      "alarms (lower precision), and a higher threshold does the opposite. The F1-score is highest near the middle "
      "of the range, which supports the default.")
 figure(AFIG / "classifier_threshold_sweep.png", "Precision, recall, F1 and accuracy against the decision threshold")
@@ -1002,9 +1053,11 @@ para(f"Of {cm[1][0] + cm[1][1]} real peak hours, {cm[1][1]} were caught and {cm[
      f"{cm[0][1]} normal hours raised a false alarm. High recall with moderate precision is the safer trade-off "
      "for an alert, since a missed peak costs more than an unnecessary reminder. A simpler rule, flagging hours "
      f"where the regression forecast exceeds τ, is more accurate ({CR['accuracy']:.3f}) but catches only "
-     f"{CR['recall']*100:.0f}% of peaks. The deployed system uses the classifier for the next hour, and the "
-     "forecast-threshold rule for later hours, where the classifier's inputs are no longer current. On 40 random "
-     "test origins this rule was 76% accurate over hours 2–24, against 58% for the classifier.")
+     f"{CR['recall']*100:.0f}% of peaks. For hours further ahead the inputs are themselves estimated (each "
+     "forecast is fed back, and unknown readings are taken from the same hour on the previous day). On 40 random "
+     "test origins, over hours 2–24, the classifier reached accuracy 0.790, recall 0.481 and F1 0.477, against "
+     "0.815, 0.372 and 0.444 for the threshold rule. Because an alert should catch peaks, the deployed system "
+     "uses the classifier (higher recall and F1) for every forecast hour; see bugs 1 and 13 in Section 4.2.")
 
 heading("4.1.7. Deployment", 3)
 para("The forecaster and classifier are served by a Flask REST API (Table "
@@ -1146,7 +1199,7 @@ heading("4.1.11. Achievement of objectives", 3)
 table(["Objective (Section 2.6)", "Target", "Achieved"], [
     ["Clean hourly series", "Gap-free, documented", f"{stats['hourly_rows']:,} hourly rows, 0 gaps, outlier report"],
     ["Feature engineering", "≥ 25 leakage-free", "31 features, leakage test passes"],
-    ["Course algorithms compared and tuned", "LR, DT, KNN, SVM, RF", "9 regressors, 5 tuned with GridSearchCV"],
+    ["Course algorithms compared and tuned", "LR, DT, KNN, SVM, RF", "6 syllabus regressors, 4 tuned with GridSearchCV"],
     ["Improvement over baseline", "≥ 15% MAE", f"{MAE_GAIN:.1f}% MAE, {RMSE_GAIN:.1f}% RMSE"],
     ["Peak-hour classifier", "Accuracy, P, R, F1, ROC", f"Accuracy {CT['accuracy']:.3f}, ROC-AUC {CT['roc_auc']:.3f}"],
     ["Flask API, Docker, cloud", "< 1 s response", "Flask + Docker + Vercel, sub-second"],
@@ -1155,16 +1208,147 @@ table(["Objective (Section 2.6)", "Target", "Achieved"], [
     ["Ethics", "Fairness, privacy, security", "Bias analysis, model card, validation"],
 ], "Achievement of objectives", [5.2, 4.0, 5.8])
 
+heading("4.2. Testing", 2)
+para("**Testing methodology.** The system was tested at six levels: (1) unit tests of individual functions "
+     "(resampling, features, metrics, drift, classification scores); (2) data validation (schema check on "
+     "ingestion, leakage test, DVC hashes); (3) model validation (chronological hold-out, cross-validation, "
+     "quality gates against the baseline); (4) integration tests of the Flask API through its test client, "
+     "including invalid input; (5) system tests of the full Docker Compose stack and of the live cloud "
+     "deployment; and (6) regression testing, because the whole pipeline and test suite re-run in CI on every "
+     "push and every week. The test cases and their results are listed below; the evidence for each is in "
+     "Section 4.1.11 and the CI logs.")
+TC = [
+    ["TC-01", "Unit", "Hourly resampling fills a fully missing hour", "No missing values, 3 hourly rows", "As expected", "Pass"],
+    ["TC-02", "Unit", "lag_1 and roll_mean_3 use only past hours (no leakage)", "Equal to values of earlier hours", "As expected", "Pass"],
+    ["TC-03", "Unit", "Regression metrics on a perfect prediction", "MAE = RMSE = 0, R² = 1", "As expected", "Pass"],
+    ["TC-04", "Unit", "PSI on identical vs shifted distributions", "< 0.1 and > 0.2", "As expected", "Pass"],
+    ["TC-05", "Unit", "Accuracy, precision, recall, confusion matrix on a known case", "0.5 / 0.5 / 0.5, [[1,1],[1,1]]", "As expected", "Pass"],
+    ["TC-06", "Data", "Dataset schema on ingestion", "8 expected columns", "Schema validation passed", "Pass"],
+    ["TC-07", "Data", "Pipeline reproducibility (dvc status after repro)", "Up to date", "Data and pipelines are up to date", "Pass"],
+    ["TC-08", "Model", f"Forecaster beats persistence baseline (test MAE)", f"< {B['mae']:.3f} kW", f"{T['mae']:.3f} kW", "Pass"],
+    ["TC-09", "Model", "Peak classifier ROC-AUC (CI gate)", "> 0.75", f"{CT['roc_auc']:.3f}", "Pass"],
+    ["TC-10", "Model", "Retraining gives identical scores (registry versions)", "Same test MAE every version", "Identical", "Pass"],
+    ["TC-11", "API", "GET /api/health", "HTTP 200, status ok", "HTTP 200", "Pass"],
+    ["TC-12", "API", "POST /api/predict with 169 h history, horizon 6", "6 forecasts, lower ≤ forecast ≤ upper", "As expected", "Pass"],
+    ["TC-13", "API", "Response is strictly valid JSON (no NaN)", "Parses with strict JSON", "As expected", "Pass"],
+    ["TC-14", "API", "POST /api/predict with too little history", "HTTP 422", "HTTP 422", "Pass"],
+    ["TC-15", "API", "POST /api/predict with negative voltage", "HTTP 422", "HTTP 422", "Pass"],
+    ["TC-16", "API", "GET /api/forecast with horizon 99", "HTTP 422", "HTTP 422", "Pass"],
+    ["TC-17", "API", "GET /api/forecast with malformed origin", "HTTP 422, error counted in Prometheus", "As expected", "Pass"],
+    ["TC-18", "API", "GET /api/metrics exposes Prometheus counters", "voltcast_* metrics present", "As expected", "Pass"],
+    ["TC-19", "System", "docker compose up starts all services", "5 containers running", "5 running, API healthy", "Pass"],
+    ["TC-20", "System", "Prometheus scrapes the API", "Target health up", "up", "Pass"],
+    ["TC-21", "System", "Grafana dashboard provisioned", "Dashboard + data source present", "As expected", "Pass"],
+    ["TC-22", "System", "Prediction log written", "One JSON line per request", "As expected", "Pass"],
+    ["TC-23", "Build", "React web app builds", "vite build succeeds", "Built", "Pass"],
+    ["TC-24", "Build", "Docker image builds in CI", "Image built", "Built", "Pass"],
+    ["TC-25", "Config", "Kubernetes manifests and Compose file valid", "Parse without errors", "Deployment, Service, HPA", "Pass"],
+    ["TC-26", "Deployment", f"Live web app {LIVE_URL}", "HTTP 200", "HTTP 200", "Pass"],
+    ["TC-27", "Deployment", "Live API health and 24-h forecast", "HTTP 200, deployed model reported", "As expected", "Pass"],
+    ["TC-28", "UI", "Web app renders all charts and runs a forecast", "Charts, forecast and statistics shown", "13 charts, forecast shown", "Pass"],
+    ["TC-29", "UI", "Web app on a 375 px phone screen", "No horizontal scrolling", "Page width = screen width", "Pass"],
+    ["TC-30", "CI", "Full CI/CT workflow on push", "All steps succeed", "Success", "Pass"],
+]
+table(["ID", "Type", "Test case", "Expected result", "Actual result", "Status"], TC,
+      "Test cases and results", [1.3, 1.6, 5.0, 3.3, 2.6, 1.2])
+para(f"**Testing results.** All {len(TC)} test cases pass. TC-01 to TC-05 and TC-11 to TC-18 are automated in "
+     "tests/test_pipeline.py and run in CI on every push; TC-06 to TC-10 are checked by the DVC pipeline and the "
+     "CI quality gates; TC-19 to TC-30 were executed on the deployed system, with the terminal evidence in Section "
+     "4.1.11.")
+para(f"**Identified bugs and corrective actions.** Table {nt()} lists the real defects found during development "
+     "and testing, and how each was fixed.")
+table(["#", "Bug / issue found", "Cause", "Corrective action"], [
+    ["1", "Peak alert raised for every hour of a 24-h forecast, including at night",
+     "Decision-tree classifier relied on previous-hour readings, which are carried forward (stale) for later hours",
+     "Later hours first flagged by forecast > τ (76% vs 58% accuracy); after the syllabus-only change the random "
+     "forest classifier is used for every hour (higher recall and F1 than the rule)"],
+    ["2", "Browser rejected API responses (invalid JSON)", "Missing peak probabilities serialised as NaN",
+     "Missing values returned as null; test now parses JSON strictly"],
+    ["3", "Live API returned HTTP 500", "Classifier threshold file lived in reports/, which is not deployed",
+     "Threshold saved next to the model in models/peak_classifier.json"],
+    ["4", "Live web app returned HTTP 404", "Cloud function bundle did not include the built React files",
+     "vercel.json includes public/** in the function"],
+    ["5", "Hand-made report diagrams disappeared", "DVC clears a stage's output folder before re-running it",
+     "Diagrams moved to their own folder (report/diagrams)"],
+    ["6", "dvc repro failed on parameters", "Wrong syntax for a non-default params file", "Dictionary syntax in dvc.yaml"],
+    ["7", "MLflow refused to log tree-based models", "Safety check on serialised tree types",
+     "Trusted types listed explicitly for models produced by the pipeline"],
+    ["8", "Training run stalled for two hours", "Parallel worker deadlock after the computer slept",
+     "Run stopped and repeated; long runs now run in the background and are monitored"],
+    ["9", "Charts drew dates as categories / overflowed their cards", "Plotly mutated a shared layout; grid min-width",
+     "Fresh layout copy per chart; min-width: 0 on grid items"],
+    ["10", "Random-forest model file 65 MB, slow single forecasts", "Uncompressed trees; worker start-up per prediction",
+     "Saved compressed (22 MB); predictions single-threaded"],
+    ["11", "Web page loaded slowly (1.5 MB of JavaScript)", "Full Plotly bundle", "Plotly cartesian bundle (0.5 MB)"],
+    ["12", "Charting library failed to load", "Library URL not available on the CDN", "Library installed through npm and bundled"],
+    ["13", "24-h forecasts stayed high all night (about 1.8 kW against about 0.3 kW actual)",
+     "Unknown future readings were filled by repeating the last observed hour (a busy morning hour)",
+     "Use the same hour of the previous day instead: mean error over the 24 hours fell from 0.569 to 0.484 kW on "
+     "60 test start points (and by 9-15% on three other samples)"],
+], "Identified bugs and corrective actions", [0.7, 4.3, 4.6, 5.4])
+
+heading("4.3. Results and discussion", 2)
+best_t2 = AN["test_all_models"][meta["model_name"]]
+table(["Result", "Value"], [
+    ["Deployed forecaster", f"{LBL[meta['model_name']]} ({'tuned' if meta['tuned'] else 'default hyper-parameters'})"],
+    ["Test MAE / MSE / RMSE", f"{T['mae']:.3f} kW / {T['mse']:.3f} / {T['rmse']:.3f} kW"],
+    ["Test R²", f"{T['r2']:.3f}"],
+    ["Accuracy (1 − WAPE)", f"{best_t2['accuracy_1_minus_wape'] * 100:.1f}%"],
+    ["Forecasts within ±0.5 kW", f"{best_t2['within_0_5kw_pct']:.1f}%"],
+    ["Improvement over persistence baseline", f"{MAE_GAIN:.1f}% lower MAE"],
+    ["Peak classifier", f"{CLF_LBL[clf['selected']]}: accuracy {CT['accuracy'] * 100:.1f}%, precision "
+     f"{CT['precision'] * 100:.1f}%, recall {CT['recall'] * 100:.1f}%, F1 {CT['f1']:.3f}, ROC-AUC {CT['roc_auc']:.3f}"],
+    ["Tests", f"{len(TC)} test cases passed (11 automated in CI)"],
+    ["Live deployment", LIVE_URL],
+], "Summary of results", [5.5, 9.5])
+para("**Discussion.** All syllabus algorithms were compared under the same protocol. The ensemble (random "
+     "forest) generalises best, the single decision tree shows the over-fitting that tuning corrects, the "
+     "linear models under-fit, and distance- and margin-based models (KNN, SVM) sit in between, matching "
+     "the theory in Chapter 2. The forecaster's error grows with the horizon and is highest in evening and "
+     "high-use hours, which are inherently harder to predict from past meter data. The MLOps side works end to "
+     "end: every push is tested, versioned and deployed automatically, and monitoring detected real seasonal "
+     "drift.")
+
+heading("4.4. Progress against the proposal and deviations", 2)
+para("All proposed features and modules are implemented and operational. The following changes were made "
+     "during development; each is documented here as required.")
+table(["Area", "Original plan", "Final implementation", "Reason"], [
+    ["Serving framework", "FastAPI", "Flask", "Flask is the framework used in the course (Exp. 7)"],
+    ["Algorithms", "Included gradient boosting", "Syllabus algorithms only (random forest deployed)",
+     "Keep the project within the course syllabus; random forest was almost as accurate"],
+    ["Classifier comparison", "Logistic regression as reference", "Random forest classifier", "Syllabus algorithm"],
+    ["Web front end", "Single static page", "React (Vite) application + Streamlit for local use",
+     "Better interactivity and a maintainable component structure"],
+    ["Monitoring", "PSI drift report only", "Prometheus + Grafana + prediction log + PSI", "Course Exp. 7 and 10"],
+    ["Versioning", "Pipeline script", "DVC pipeline with dvc.lock + MLflow registry", "Course Exp. 9"],
+    ["Dataset storage", "Raw archive downloaded each run", "CSV, shipped compressed in the repository",
+     "Reproducible offline; guideline requires dataset in the repository"],
+], "Deviations from the original proposal", [2.7, 3.2, 4.4, 4.7])
+para("**Pending items.** None of the proposed modules is pending. Running the Kubernetes manifests on a live "
+     "cluster is listed under future work, as no cluster was available.")
+
+heading("4.5. Individual contribution of each team member", 2)
+table(["Member", "Individual contribution"], [
+    ["Kunal Mittal (24BCS12354)", "Selected and analysed the dataset; wrote ingestion, preprocessing and feature "
+     "engineering; trained and tuned all syllabus regressors; built the peak-hour classifier; produced the "
+     "evaluation, analysis and model-comparison results."],
+    ["Ansh Kumar (24BCS12097)", "Built the Flask REST API with validation; developed the React web application and "
+     "Streamlit dashboard; wrote the Dockerfile and Docker Compose stack; deployed to Vercel; wrote the "
+     "Kubernetes manifests."],
+    ["Vishal Kumar Shrivastava (24BCS12629)", "Set up GitHub Actions CI/CD, the DVC pipeline and the MLflow "
+     "registry; configured Prometheus and Grafana; wrote the automated tests; carried out the responsible-AI "
+     "analysis; prepared the report and user manual."],
+], "Individual contributions", [4.4, 10.6])
+
 # ================= CHAPTER 5 =================
 chapter(5, "CONCLUSION AND FUTURE WORK")
 heading("5.1. Conclusion", 2)
 para("VoltCast is a complete, working Household Electricity Consumption Prediction System built on MLOps "
      "principles. From 2.07 million raw smart-meter readings, a DVC-versioned pipeline produces a clean hourly "
-     "series and 31 leakage-free features. Nine regression models, covering every algorithm in the course, "
-     "are compared and tuned with GridSearchCV under MLflow tracking. The deployed random forest, the best "
-     "syllabus algorithm and within a few thousandths of a kilowatt of the gradient-boosting reference, "
-     f"forecasts with a test MAE of {T['mae']:.3f} kW and R² of {T['r2']:.3f}, {MAE_GAIN:.1f}% better than the "
-     f"persistence baseline. A tuned decision tree flags peak hours with {CT['recall']*100:.0f}% recall and "
+     "series and 31 leakage-free features. Every regression algorithm in the course syllabus "
+     "are compared and tuned with GridSearchCV under MLflow tracking. The deployed "
+     f"{LBL[meta['model_name']].lower()} forecasts with a test MAE of {T['mae']:.3f} kW and R² of {T['r2']:.3f}, {MAE_GAIN:.1f}% better than the "
+     f"persistence baseline. A {CLF_LBL[clf['selected']].lower()} flags peak hours with {CT['recall']*100:.0f}% recall and "
      f"ROC-AUC {CT['roc_auc']:.3f}. The models are served by a Flask API in Docker and on the Vercel cloud, "
      "protected by CI/CD quality gates and tests, observed through Prometheus and Grafana, and reviewed for "
      "fairness, privacy and security.")
@@ -1179,12 +1363,29 @@ para("**Expected vs obtained results.** The ≥ 15% improvement over the baselin
      "helped the poorly regularised models (decision tree, KNN) but not the ensembles, whose defaults were "
      "already near-optimal. The peak classifier's precision on the test period is lower than on validation "
      "because summer has fewer peak hours, which is another effect of seasonal drift.")
-heading("5.2. Future work", 2)
+heading("5.2. Limitations", 2)
+bullets([
+    "**Single household.** The model is trained on one house in France (2006–2010); it cannot be assumed to work "
+    "for other homes, climates or appliance mixes without retraining.",
+    "**No weather data.** Temperature strongly drives heating and cooling load but was not available for the "
+    "period, which limits accuracy in winter and summer peaks.",
+    f"**Moderate accuracy for spikes.** R² is {T['r2']:.2f}; sudden appliance use cannot be predicted from past "
+    "meter readings, and errors are largest in evening and high-use hours.",
+    "**Multi-step forecasts degrade.** Error grows with the forecast horizon because future electrical readings "
+    "are unknown and approximated by the same hour of the previous day.",
+    "**Seasonal drift.** The monitor detects drift and recommends retraining, but retraining is triggered on a "
+    "schedule, not automatically by the drift signal.",
+    "**Monitoring scope in the cloud.** Prometheus and Grafana run in the Docker deployment; the serverless cloud "
+    "deployment exposes the same metrics endpoint but each function instance keeps its own counters.",
+    "**Kubernetes not run on a live cluster.** The manifests are written and validated, but were not applied to a "
+    "cluster during the project.",
+])
+heading("5.3. Future work", 2)
 bullets([
     "**Weather and occupancy inputs:** add outdoor temperature (heating/cooling degree hours) and holiday "
     "calendars from an API; expected to reduce winter peak error substantially.",
-    "**Deep and probabilistic models:** evaluate LSTM/Temporal Fusion Transformer and quantile gradient "
-    "boosting for calibrated prediction intervals [12], [15].",
+    "**Probabilistic forecasts:** calibrated prediction intervals, for example from the spread of the random "
+    "forest's individual trees [15].",
     "**Multi-household, Indian data:** train a global model across many homes using data from IS 16444 "
     "smart meters, with federated learning to protect privacy.",
     "**Automated retraining:** connect the monitor's retraining flag to a workflow trigger and promote a new "
@@ -1283,6 +1484,35 @@ table(["Exp.", "Aim (syllabus)", "How it was done in VoltCast", "Code", "Evidenc
     ["11–15", "Mini project phases 1–5", "Problem and data (Ch. 1–3), models (4.1.2–4.1.6), deployment (4.1.7), "
      "automation (4.1.8), monitoring and ethics (4.1.9–4.1.10)", "whole repository", "Ch. 1–5"],
 ], "Syllabus experiments mapped to the project", [1.2, 3.4, 5.6, 2.6, 2.2])
+
+para("Table A.3 maps the requirements of the Mini Project guidelines to this report and the repository.")
+table(["Guideline requirement", "Where it is addressed"], [
+    ["Introduction, problem statement, motivation", "Chapter 1 (1.1, 1.2)"],
+    ["Objectives, scope, expected outcomes", "2.5, 2.6"],
+    ["Literature review / related work", "Chapter 2"],
+    ["Proposed methodology", "3.4–3.6"],
+    ["System architecture / block diagram, flowcharts", "3.6, Graphical abstract"],
+    ["Module description, technology stack", "3.6 (module table, technology stack)"],
+    ["Dataset description", "3.1 (description, dataset dictionary, statistics)"],
+    ["Database / ER diagram, other design diagrams", "3.6 (ER diagram, DFDs, use case, sequence, deployment, CI/CD)"],
+    ["Work distribution, roles and responsibilities", "1.3"],
+    ["Timeline and milestones", "1.4"],
+    ["Implementation, working prototype, screenshots", "4.1, User Manual"],
+    ["Test cases, methodology, results", "4.2"],
+    ["Performance evaluation, graphs and tables", "4.1.2–4.1.10"],
+    ["Identified bugs and corrective actions", "4.2"],
+    ["Results and discussion", "4.3"],
+    ["Progress against proposal, deviations", "4.4"],
+    ["Individual contribution of each member", "4.5"],
+    ["Conclusion, limitations, future scope", "5.1, 5.2, 5.3"],
+    ["References", "References"],
+    ["GitHub repository link", REPO_URL],
+    ["Live deployment link", LIVE_URL],
+    ["README, installation and execution instructions", "README.md in the repository; User Manual"],
+    ["Requirements / dependencies, configuration files", "requirements.txt, requirements-dev.txt, configs/params.yaml"],
+    ["Dataset and model files", "data/household_power_consumption.csv.gz, models/"],
+    ["Complete source code", "Appendix 4 and the repository"],
+], "Mini Project guideline compliance", [7.0, 8.0])
 
 heading("4. Source code", 2)
 para("This section lists the complete source code of the project as submitted (repository "

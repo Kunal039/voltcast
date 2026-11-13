@@ -82,8 +82,8 @@ def test_predict_endpoint_returns_horizon():
     out = json.loads(r.get_data(as_text=True), parse_constant=lambda c: pytest.fail(f"invalid JSON constant {c}"))
     assert len(out["forecast"]) == 6
     assert all(p["lower_kw"] <= p["predicted_kw"] <= p["upper_kw"] for p in out["forecast"])
-    assert 0 <= out["forecast"][0]["peak_probability"] <= 1 and out["forecast"][0]["alert_method"] == "classifier"
-    assert all(p["alert_method"] == "forecast_threshold" for p in out["forecast"][1:])
+    assert all(0 <= p["peak_probability"] <= 1 for p in out["forecast"])
+    assert all(p["peak_alert"] == (p["peak_probability"] >= 0.5) for p in out["forecast"])
 
 
 def test_predict_rejects_short_history():

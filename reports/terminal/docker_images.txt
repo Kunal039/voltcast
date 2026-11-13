@@ -1,6 +1,6 @@
 PS D:\01 Projects\VoltCast> docker images voltcast; docker compose config --services
 IMAGE             ID             DISK USAGE   CONTENT SIZE   EXTRA
-voltcast:latest   7f46e17556f8       1.69GB          387MB   U    
+voltcast:latest   e29b8b06c900       1.74GB          405MB   U    
 api
 dashboard
 prometheus

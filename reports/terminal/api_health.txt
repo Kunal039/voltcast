@@ -1,5 +1,5 @@
 PS D:\01 Projects\VoltCast> curl.exe -s http://localhost:8000/api/health; ''; curl.exe -s http://localhost:8000/api/model-info | python -m json.tool
-{"model":"random_forest","status":"ok","trained_at":"2026-11-03T13:28:44+00:00"}
+{"model":"random_forest","status":"ok","trained_at":"2026-11-13T06:57:01+00:00"}
 
 {
     "baseline_test_metrics": {
@@ -16,16 +16,16 @@ PS D:\01 Projects\VoltCast> curl.exe -s http://localhost:8000/api/health; ''; cu
         "n_jobs": -1,
         "random_state": 42
     },
-    "mlflow_run_id": "8246d832650d40dbad189730dff0cf27",
+    "mlflow_run_id": "874ef8e4ed5642ff993085092d39f2f9",
     "model_name": "random_forest",
     "n_features": 31,
     "peak_threshold_kw": 1.5895000100135803,
     "test_metrics": {
         "mae": 0.29474407418193477,
-        "mape": 40.843455988883896,
-        "mse": 0.18797786385717724,
-        "r2": 0.6199184834605562,
-        "rmse": 0.43356414041889724
+        "mape": 40.8434559888839,
+        "mse": 0.18797786385717727,
+        "r2": 0.6199184834605561,
+        "rmse": 0.4335641404188973
     },
     "test_period": [
         "2010-06-01 00:00:00",
@@ -35,6 +35,6 @@ PS D:\01 Projects\VoltCast> curl.exe -s http://localhost:8000/api/health; ''; cu
         "2006-12-23 17:00:00",
         "2010-05-31 23:00:00"
     ],
-    "trained_at": "2026-11-03T13:28:44+00:00",
+    "trained_at": "2026-11-13T06:57:01+00:00",
     "tuned": false
 }

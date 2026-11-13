@@ -3,7 +3,7 @@
 Turns the forecasting problem into a binary alert (useful for demand response):
 label = 1 when consumption exceeds the 75th percentile of the training period.
 A decision tree is trained with default settings and tuned with GridSearchCV
-(time-series folds, F1 scoring); a logistic regression is the linear reference.
+(time-series folds, F1 scoring), and compared with a random forest classifier.
 Evaluated with accuracy, precision, recall, F1, ROC-AUC and the confusion matrix.
 """
 import json
@@ -12,12 +12,10 @@ import joblib
 import mlflow
 import numpy as np
 import pandas as pd
-from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (accuracy_score, confusion_matrix, f1_score, precision_recall_curve,
                              precision_score, recall_score, roc_auc_score, roc_curve)
 from sklearn.model_selection import GridSearchCV, TimeSeriesSplit
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeClassifier
 
 from src.features import feature_columns
@@ -58,9 +56,9 @@ def main() -> None:
                           cv=TimeSeriesSplit(n_splits=params["tuning"]["cv_splits"]), scoring="f1", n_jobs=-1)
     search.fit(X_tr, y_tr)
     models = {
-        "logistic_regression": make_pipeline(StandardScaler(), LogisticRegression(max_iter=2000)).fit(X_tr, y_tr),
         "decision_tree_default": DecisionTreeClassifier(**cp["decision_tree"]).fit(X_tr, y_tr),
         "decision_tree_tuned": search.best_estimator_,
+        "random_forest": RandomForestClassifier(**cp["random_forest"]).fit(X_tr, y_tr),
     }
     val_scores = {}
     for name, model in models.items():
@@ -74,8 +72,9 @@ def main() -> None:
 
     best = max(val_scores, key=lambda n: val_scores[n]["f1"])
     full = pd.concat([train, val])
-    final = (DecisionTreeClassifier(**cp["decision_tree"], **search.best_params_) if best == "decision_tree_tuned"
-             else models[best].__class__(**models[best].get_params()))
+    final = {"decision_tree_default": lambda: DecisionTreeClassifier(**cp["decision_tree"]),
+             "decision_tree_tuned": lambda: DecisionTreeClassifier(**cp["decision_tree"], **search.best_params_),
+             "random_forest": lambda: RandomForestClassifier(**cp["random_forest"])}[best]()
     final.fit(full[cols].values, label(full))
     proba = final.predict_proba(test[cols].values)[:, 1]
     y_test = label(test)
@@ -95,10 +94,11 @@ def main() -> None:
     log.info("TEST forecast>threshold rule: acc=%.3f prec=%.3f rec=%.3f F1=%.3f", rule_scores["accuracy"],
              rule_scores["precision"], rule_scores["recall"], rule_scores["f1"])
 
-    joblib.dump(final, ROOT / "models" / "peak_classifier.joblib")
+    joblib.dump(final, ROOT / "models" / "peak_classifier.joblib", compress=3)
     # Small sidecar the API needs at run time (reports/ is not shipped to the server).
     (ROOT / "models" / "peak_classifier.json").write_text(json.dumps(
-        {"model": best, "threshold_kw": threshold_kw, "hyperparameters": search.best_params_}, indent=2))
+        {"model": best, "threshold_kw": threshold_kw, "hyperparameters": final.get_params(),
+         "tuned_tree_params": search.best_params_}, indent=2, default=str))
     (ROOT / "reports" / "classification.json").write_text(json.dumps({
         "threshold_kw": threshold_kw,
         "threshold_quantile": cp["threshold_quantile"],

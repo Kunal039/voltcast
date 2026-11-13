@@ -22,6 +22,7 @@ Updating lock file 'dvc.lock'
 
 Running stage 'evaluate':
 > python -m src.evaluate
+Updating lock file 'dvc.lock'
 
 Running stage 'export_web':
 > python -m src.export_web
@@ -31,65 +32,63 @@ Running stage 'analyze':
 > python -m src.analysis
 Updating lock file 'dvc.lock'
 Use `dvc push` to send your updates to remote storage.
-2026-11-03 18:52:00,629 | INFO    | ingestion | Downloading dataset from https://archive.ics.uci.edu/static/public/235/individual+household+electric+power+consumption.zip
-2026-11-03 18:52:22,598 | INFO    | ingestion | Saved 2075259 rows to D:\01 Projects\VoltCast\data\household_power_consumption.csv
-2026-11-03 18:52:22,624 | INFO    | ingestion | Schema validation passed (8 columns)
-2026-11-03 18:52:25,914 | INFO    | preprocess | Loaded 2075259 minute rows, 1.25% missing
-2026-11-03 18:52:26,156 | INFO    | preprocess | Saved 34589 hourly rows to D:\01 Projects\VoltCast\data\processed\hourly.parquet
-2026-11-03 18:52:27,405 | INFO    | features | Built 34421 rows x 31 features
-2026-11-03 18:52:32,092 | INFO    | train | Train 26503 | Val 3624 | Test 4294 rows
-2026-11-03 18:52:34,090 | INFO    | train | persistence_baseline     train MAE=0.4487  val MAE=0.4414 RMSE=0.6686 R2=0.3635 (0.0s)
-2026-11-03 18:52:34,142 | INFO    | train | seasonal_naive_24h       train MAE=0.6625  val MAE=0.6359 RMSE=0.9121 R2=-0.1845 (0.0s)
-2026-11-03 18:52:34,251 | INFO    | train | linear_regression        train MAE=0.4086  val MAE=0.3980 RMSE=0.5568 R2=0.5586 (0.0s)
-2026-11-03 18:52:34,346 | INFO    | train | ridge_regression         train MAE=0.4086  val MAE=0.3980 RMSE=0.5568 R2=0.5586 (0.0s)
-2026-11-03 18:52:35,262 | INFO    | train | decision_tree            train MAE=0.0000  val MAE=0.5059 RMSE=0.7762 R2=0.1423 (0.8s)
-2026-11-03 18:52:36,267 | INFO    | train | knn                      train MAE=0.3470  val MAE=0.3948 RMSE=0.5662 R2=0.5435 (0.0s)
-2026-11-03 18:54:12,397 | INFO    | train | svm                      train MAE=0.2960  val MAE=0.3554 RMSE=0.5311 R2=0.5983 (47.4s)
-2026-11-03 18:54:21,516 | INFO    | train | random_forest            train MAE=0.2203  val MAE=0.3451 RMSE=0.5087 R2=0.6316 (8.9s)
-2026-11-03 18:54:23,420 | INFO    | train | hist_gradient_boosting   train MAE=0.2895  val MAE=0.3415 RMSE=0.4982 R2=0.6466 (1.7s)
-2026-11-03 18:54:31,286 | INFO    | train | tuned ridge_regression   {'alpha': 100.0}  CV MAE=0.4028  val MAE 0.3980 -> 0.3978
-2026-11-03 18:54:35,619 | INFO    | train | tuned decision_tree      {'max_depth': 10, 'min_samples_leaf': 100}  CV MAE=0.3969  val MAE 0.5059 -> 0.3799
-2026-11-03 18:54:49,542 | INFO    | train | tuned knn                {'n_neighbors': 40, 'weights': 'distance'}  CV MAE=0.4059  val MAE 0.3948 -> 0.3876
-2026-11-03 18:58:03,305 | INFO    | train | tuned random_forest      {'max_depth': 16, 'min_samples_leaf': 20}  CV MAE=0.3679  val MAE 0.3451 -> 0.3476
-2026-11-03 18:58:20,838 | INFO    | train | tuned hist_gradient_boosting {'learning_rate': 0.03, 'max_leaf_nodes': 15}  CV MAE=0.3630  val MAE 0.3415 -> 0.3438
-2026-11-03 18:58:20,839 | INFO    | train | Best model on validation: random_forest (default); best overall incl. reference models: hist_gradient_boosting
-2026-11-03 18:58:31,675 | INFO    | train | TEST random_forest: MAE=0.2947 RMSE=0.4336 R2=0.6199 | persistence MAE=0.3773
+2026-11-13 12:22:51,901 | INFO    | ingestion | Decompressed bundled dataset household_power_consumption.csv.gz -> D:\01 Projects\VoltCast\data\household_power_consumption.csv
+2026-11-13 12:22:51,924 | INFO    | ingestion | Schema validation passed (8 columns)
+2026-11-13 12:22:54,922 | INFO    | preprocess | Loaded 2075259 minute rows, 1.25% missing
+2026-11-13 12:22:55,347 | INFO    | preprocess | Saved 34589 hourly rows to D:\01 Projects\VoltCast\data\processed\hourly.parquet
+WARNING: Process 'C:\Users\Kunal Mittal\AppData\Roaming\Python\Python314\Scripts\dvc repro --force' with (Pid 15432), in RWLock-file 'data\processed\features.parquet' had been killed. Auto removed it from the lock file.
+2026-11-13 12:22:56,675 | INFO    | features | Built 34421 rows x 31 features
+WARNING: Process 'C:\Users\Kunal Mittal\AppData\Roaming\Python\Python314\Scripts\dvc repro --force' with (Pid 15432), in RWLock-file 'models\model.joblib' had been killed. Auto removed it from the lock file.
+WARNING: Process 'C:\Users\Kunal Mittal\AppData\Roaming\Python\Python314\Scripts\dvc repro --force' with (Pid 15432), in RWLock-file 'models\model.joblib' had been killed. Auto removed it from the lock file.
+2026-11-13 12:23:07,433 | INFO    | train | Train 26503 | Val 3624 | Test 4294 rows
+2026-11-13 12:23:08,818 | INFO    | train | persistence_baseline     train MAE=0.4487  val MAE=0.4414 RMSE=0.6686 R2=0.3635 (0.0s)
+2026-11-13 12:23:08,849 | INFO    | train | seasonal_naive_24h       train MAE=0.6625  val MAE=0.6359 RMSE=0.9121 R2=-0.1845 (0.0s)
+2026-11-13 12:23:08,912 | INFO    | train | linear_regression        train MAE=0.4086  val MAE=0.3980 RMSE=0.5568 R2=0.5586 (0.0s)
+2026-11-13 12:23:08,959 | INFO    | train | ridge_regression         train MAE=0.4086  val MAE=0.3980 RMSE=0.5568 R2=0.5586 (0.0s)
+2026-11-13 12:23:09,530 | INFO    | train | decision_tree            train MAE=0.0000  val MAE=0.5059 RMSE=0.7762 R2=0.1423 (0.5s)
+2026-11-13 12:23:10,083 | INFO    | train | knn                      train MAE=0.3470  val MAE=0.3948 RMSE=0.5662 R2=0.5435 (0.0s)
+2026-11-13 12:24:01,134 | INFO    | train | svm                      train MAE=0.2960  val MAE=0.3554 RMSE=0.5311 R2=0.5983 (21.9s)
+2026-11-13 12:24:06,375 | INFO    | train | random_forest            train MAE=0.2203  val MAE=0.3451 RMSE=0.5087 R2=0.6316 (5.1s)
+2026-11-13 12:24:11,552 | INFO    | train | tuned ridge_regression   {'alpha': 100.0}  CV MAE=0.4028  val MAE 0.3980 -> 0.3978
+2026-11-13 12:24:14,237 | INFO    | train | tuned decision_tree      {'max_depth': 10, 'min_samples_leaf': 100}  CV MAE=0.3969  val MAE 0.5059 -> 0.3799
+2026-11-13 12:24:22,285 | INFO    | train | tuned knn                {'n_neighbors': 40, 'weights': 'distance'}  CV MAE=0.4059  val MAE 0.3948 -> 0.3876
+2026-11-13 12:26:42,576 | INFO    | train | tuned random_forest      {'max_depth': 16, 'min_samples_leaf': 20}  CV MAE=0.3679  val MAE 0.3451 -> 0.3476
+2026-11-13 12:26:42,576 | INFO    | train | Best model on validation: random_forest (default)
+2026-11-13 12:26:50,200 | INFO    | train | TEST random_forest: MAE=0.2947 RMSE=0.4336 R2=0.6199 | persistence MAE=0.3773
 C:\Users\Kunal Mittal\AppData\Roaming\Python\Python314\site-packages\mlflow\types\utils.py:440: UserWarning: Hint: Inferred schema contains integer column(s). Integer columns in Python cannot represent missing values. If your input data contains missing values at inference time, it will be encoded as floats and will cause a schema enforcement error. The best way to avoid this problem is to infer the model schema based on a realistic data sample (training dataset) that includes missing values. Alternatively, you can declare integer columns as doubles (float64) whenever these columns may have missing values. See `Handling Integers With Missing Values <https://www.mlflow.org/docs/latest/models.html#handling-integers-with-missing-values>`_ for more details.
   warnings.warn(
 Registered model 'voltcast-forecaster' already exists. Creating a new version of this model...
-Created version '6' of model 'voltcast-forecaster'.
-2026-11-03 18:58:44,702 | INFO    | train | Saved model to D:\01 Projects\VoltCast\models\model.joblib
-2026-11-03 18:58:50,814 | INFO    | classify | Peak threshold 1.590 kW | positive rate train 25.0% val 29.2%
-2026-11-03 18:59:07,254 | INFO    | classify | logistic_regression    val acc=0.807 prec=0.764 rec=0.492 F1=0.599 AUC=0.887 (train F1 0.662)
-2026-11-03 18:59:07,319 | INFO    | classify | decision_tree_default  val acc=0.770 prec=0.610 rec=0.589 F1=0.599 AUC=0.717 (train F1 1.000)
-2026-11-03 18:59:07,388 | INFO    | classify | decision_tree_tuned    val acc=0.790 prec=0.603 rec=0.821 F1=0.696 AUC=0.879 (train F1 0.735)
-2026-11-03 18:59:08,008 | INFO    | classify | TEST decision_tree_tuned: acc=0.803 prec=0.454 rec=0.779 F1=0.574 AUC=0.873
-2026-11-03 18:59:08,066 | INFO    | classify | TEST forecast>threshold rule: acc=0.878 prec=0.652 rec=0.605 F1=0.628
-2026-11-03 18:59:08,070 | INFO    | classify | Saved peak classifier (decision_tree_tuned)
-2026-11-03 18:59:13,911 | INFO    | monitor | PSI: {'lag_1': 0.1891, 'roll_mean_24': 0.2895, 'Voltage_lag1': 0.1685, 'Global_intensity_lag1': 0.1998, 'Sub_metering_3_lag1': 0.7285, 'hour': 0.0, 'target': 0.1891}
-2026-11-03 18:59:13,911 | INFO    | monitor | Recent MAE 0.3511 (19.1% vs reference) -> retrain=True
+Created version '7' of model 'voltcast-forecaster'.
+2026-11-13 12:27:02,000 | INFO    | train | Saved model to D:\01 Projects\VoltCast\models\model.joblib
+2026-11-13 12:27:06,898 | INFO    | classify | Peak threshold 1.590 kW | positive rate train 25.0% val 29.2%
+2026-11-13 12:27:19,851 | INFO    | classify | decision_tree_default  val acc=0.770 prec=0.610 rec=0.589 F1=0.599 AUC=0.717 (train F1 1.000)
+2026-11-13 12:27:19,889 | INFO    | classify | decision_tree_tuned    val acc=0.790 prec=0.603 rec=0.821 F1=0.696 AUC=0.879 (train F1 0.735)
+2026-11-13 12:27:20,073 | INFO    | classify | random_forest          val acc=0.832 prec=0.668 rec=0.841 F1=0.745 AUC=0.910 (train F1 0.875)
+2026-11-13 12:27:21,527 | INFO    | classify | TEST random_forest: acc=0.857 prec=0.562 rec=0.718 F1=0.631 AUC=0.910
+2026-11-13 12:27:21,568 | INFO    | classify | TEST forecast>threshold rule: acc=0.878 prec=0.652 rec=0.605 F1=0.628
+2026-11-13 12:27:21,907 | INFO    | classify | Saved peak classifier (random_forest)
+2026-11-13 12:27:26,607 | INFO    | monitor | PSI: {'lag_1': 0.1891, 'roll_mean_24': 0.2895, 'Voltage_lag1': 0.1685, 'Global_intensity_lag1': 0.1998, 'Sub_metering_3_lag1': 0.7285, 'hour': 0.0, 'target': 0.1891}
+2026-11-13 12:27:26,607 | INFO    | monitor | Recent MAE 0.3511 (19.1% vs reference) -> retrain=True
 D:\01 Projects\VoltCast\src\evaluate.py:169: MatplotlibDeprecationWarning: vert: bool was deprecated in Matplotlib 3.11 and will be removed in 3.13. Use orientation: {'vertical', 'horizontal'} instead.
   ax.boxplot(hourly[c], vert=True, widths=0.5, flierprops={"markersize": 2, "alpha": 0.3})
 D:\01 Projects\VoltCast\src\evaluate.py:169: MatplotlibDeprecationWarning: vert: bool was deprecated in Matplotlib 3.11 and will be removed in 3.13. Use orientation: {'vertical', 'horizontal'} instead.
   ax.boxplot(hourly[c], vert=True, widths=0.5, flierprops={"markersize": 2, "alpha": 0.3})
 D:\01 Projects\VoltCast\src\evaluate.py:169: MatplotlibDeprecationWarning: vert: bool was deprecated in Matplotlib 3.11 and will be removed in 3.13. Use orientation: {'vertical', 'horizontal'} instead.
   ax.boxplot(hourly[c], vert=True, widths=0.5, flierprops={"markersize": 2, "alpha": 0.3})
-2026-11-03 18:59:40,281 | INFO    | evaluate | Figures written to D:\01 Projects\VoltCast\reports\figures
-2026-11-03 18:59:42,130 | INFO    | export_web | Wrote 4632 serving rows and dashboard bundle (84 KB)
-2026-11-03 18:59:46,052 | INFO    | analysis | test persistence_baseline           MAE=0.3773 R2=0.3349 acc(1-WAPE)=0.589
-2026-11-03 18:59:46,055 | INFO    | analysis | test seasonal_naive_24h             MAE=0.4846 R2=-0.0763 acc(1-WAPE)=0.473
-2026-11-03 18:59:46,109 | INFO    | analysis | test linear_regression              MAE=0.3437 R2=0.5295 acc(1-WAPE)=0.626
-2026-11-03 18:59:46,141 | INFO    | analysis | test ridge_regression               MAE=0.3437 R2=0.5295 acc(1-WAPE)=0.626
-2026-11-03 18:59:47,197 | INFO    | analysis | test decision_tree                  MAE=0.4233 R2=0.1468 acc(1-WAPE)=0.539
-2026-11-03 18:59:47,407 | INFO    | analysis | test knn                            MAE=0.3329 R2=0.5151 acc(1-WAPE)=0.638
-2026-11-03 19:01:15,202 | INFO    | analysis | test svm                            MAE=0.2961 R2=0.6018 acc(1-WAPE)=0.678
-2026-11-03 19:01:25,455 | INFO    | analysis | test random_forest                  MAE=0.2947 R2=0.6199 acc(1-WAPE)=0.679
-2026-11-03 19:01:27,025 | INFO    | analysis | test hist_gradient_boosting         MAE=0.2934 R2=0.6227 acc(1-WAPE)=0.681
-2026-11-03 19:01:27,063 | INFO    | analysis | test ridge_regression_tuned         MAE=0.3434 R2=0.5301 acc(1-WAPE)=0.626
-2026-11-03 19:01:27,605 | INFO    | analysis | test decision_tree_tuned            MAE=0.3301 R2=0.5406 acc(1-WAPE)=0.641
-2026-11-03 19:01:27,831 | INFO    | analysis | test knn_tuned                      MAE=0.3264 R2=0.5390 acc(1-WAPE)=0.645
-2026-11-03 19:01:36,683 | INFO    | analysis | test random_forest_tuned            MAE=0.2981 R2=0.6133 acc(1-WAPE)=0.676
-2026-11-03 19:01:38,627 | INFO    | analysis | test hist_gradient_boosting_tuned   MAE=0.2950 R2=0.6245 acc(1-WAPE)=0.679
-2026-11-03 19:03:26,069 | INFO    | matplotlib.category | Using categorical units to plot a list of strings that are all parsable as floats or dates. If these strings should be plotted as numbers, cast to the appropriate data type before plotting.
-2026-11-03 19:03:26,070 | INFO    | matplotlib.category | Using categorical units to plot a list of strings that are all parsable as floats or dates. If these strings should be plotted as numbers, cast to the appropriate data type before plotting.
-2026-11-03 19:03:26,438 | INFO    | analysis | Analysis written: 19 figures
+2026-11-13 12:27:43,499 | INFO    | evaluate | Figures written to D:\01 Projects\VoltCast\reports\figures
+2026-11-13 12:27:45,227 | INFO    | export_web | Wrote 4632 serving rows and dashboard bundle (82 KB)
+2026-11-13 12:27:48,875 | INFO    | analysis | test persistence_baseline           MAE=0.3773 R2=0.3349 acc(1-WAPE)=0.589
+2026-11-13 12:27:48,877 | INFO    | analysis | test seasonal_naive_24h             MAE=0.4846 R2=-0.0763 acc(1-WAPE)=0.473
+2026-11-13 12:27:48,907 | INFO    | analysis | test linear_regression              MAE=0.3437 R2=0.5295 acc(1-WAPE)=0.626
+2026-11-13 12:27:48,927 | INFO    | analysis | test ridge_regression               MAE=0.3437 R2=0.5295 acc(1-WAPE)=0.626
+2026-11-13 12:27:49,566 | INFO    | analysis | test decision_tree                  MAE=0.4233 R2=0.1468 acc(1-WAPE)=0.539
+2026-11-13 12:27:49,740 | INFO    | analysis | test knn                            MAE=0.3329 R2=0.5151 acc(1-WAPE)=0.638
+2026-11-13 12:28:37,302 | INFO    | analysis | test svm                            MAE=0.2961 R2=0.6018 acc(1-WAPE)=0.678
+2026-11-13 12:28:44,520 | INFO    | analysis | test random_forest                  MAE=0.2947 R2=0.6199 acc(1-WAPE)=0.679
+2026-11-13 12:28:44,550 | INFO    | analysis | test ridge_regression_tuned         MAE=0.3434 R2=0.5301 acc(1-WAPE)=0.626
+2026-11-13 12:28:44,893 | INFO    | analysis | test decision_tree_tuned            MAE=0.3301 R2=0.5406 acc(1-WAPE)=0.641
+2026-11-13 12:28:45,054 | INFO    | analysis | test knn_tuned                      MAE=0.3264 R2=0.5390 acc(1-WAPE)=0.645
+2026-11-13 12:28:51,495 | INFO    | analysis | test random_forest_tuned            MAE=0.2981 R2=0.6133 acc(1-WAPE)=0.676
+2026-11-13 12:29:56,559 | INFO    | matplotlib.category | Using categorical units to plot a list of strings that are all parsable as floats or dates. If these strings should be plotted as numbers, cast to the appropriate data type before plotting.
+2026-11-13 12:29:56,559 | INFO    | matplotlib.category | Using categorical units to plot a list of strings that are all parsable as floats or dates. If these strings should be plotted as numbers, cast to the appropriate data type before plotting.
+2026-11-13 12:29:56,762 | INFO    | analysis | Analysis written: 19 figures

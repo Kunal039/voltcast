@@ -34,7 +34,7 @@ export default function ModelPerformance({ D }) {
 
   return (
     <Section title="Model performance"
-      sub="Nine models trained on 2006–2009 and compared on Jan–May 2010 in MLflow. Only syllabus algorithms (linear and ridge regression, decision tree, KNN, SVM, random forest) may be deployed; gradient boosting and two naive baselines are kept as reference points. The deployed model (highlighted) is refit and scored once on the untouched test period.">
+      sub="The syllabus algorithms (linear and ridge regression, decision tree, KNN, SVM, random forest) and two naive baselines, trained on 2006–2009 and compared on Jan–May 2010 in MLflow. The best one (highlighted) is refit and scored once on the untouched test period.">
       <div className="grid2">
         <div className="card">
           <table>

@@ -4,7 +4,7 @@
 stages:
   ingest:
     cmd: python -m src.data_ingestion
-    deps: [src/data_ingestion.py]
+    deps: [src/data_ingestion.py, data/household_power_consumption.csv.gz]
     params: [{configs/params.yaml: [data.url]}]
     outs: [data/household_power_consumption.csv]
   preprocess:
@@ -51,7 +51,7 @@ stages:
       - web/public/data/dashboard.json: {cache: false}
   analyze:
     cmd: python -m src.analysis
-    deps: [src/analysis.py, src/train.py, data/processed/features.parquet, models/model.joblib,
+    deps: [src/analysis.py, src/train.py, src/predict.py, data/processed/features.parquet, models/model.joblib,
            models/peak_classifier.json, reports/metrics.json, data/serving/recent_hourly.csv]
     params: [{configs/params.yaml: [split, models, tuning, classification]}]
     outs: [reports/analysis: {cache: false}]

@@ -11,3 +11,4 @@ logs
 report
 **/__pycache__
 .pytest_cache
+data/household_power_consumption.csv.gz

@@ -39,7 +39,7 @@ def architecture():
     xs = [0.2, 2.6, 5.0, 7.4, 9.8, 12.2]
     labels = ["UCI dataset\n2.07 M minute\nreadings", "Data ingestion\n& schema\nvalidation",
               "Cleaning &\nhourly\nresampling", "Feature\nengineering\n(31 features)",
-              "Train 9 models\nGridSearchCV\n+ MLflow", "MLflow model\nregistry\n(best model)"]
+              "Train 8 models\nGridSearchCV\n+ MLflow", "MLflow model\nregistry\n(best model)"]
     for x, t in zip(xs, labels):
         box(ax, x, 4.6, 2.0, 1.25, t)
     for a, b in zip(xs, xs[1:]):
@@ -101,7 +101,7 @@ def alternatives():
         ax.axis("off")
     a = ["Raw CSV", "Notebook: clean +\nfeatures + LSTM", "Pickle file\nsaved manually", "Ad-hoc script\npredictions"]
     b = ["Versioned raw data", "Modular pipeline stages\n(params.yaml / dvc.yaml)",
-         "9 models, GridSearchCV\n+ MLflow registry", "Flask API + Docker\n+ React", "CI/CT + drift\nmonitoring"]
+         "8 models, GridSearchCV\n+ MLflow registry", "Flask API + Docker\n+ React", "CI/CT + drift\nmonitoring"]
     for ax, steps, title, col in [(axes[0], a, "Design A: Notebook-centric deep learning", GREY),
                                   (axes[1], b, "Design B: Modular MLOps pipeline (selected)", BLUE)]:
         ax.set_title(title, fontsize=9.5, weight="bold")
@@ -126,7 +126,7 @@ def flowchart():
              ("Resample to hourly; interpolate gaps <= 6 h", BLUE),
              ("Build lag, rolling & calendar features", BLUE),
              ("Chronological split: train / validation / test", BLUE),
-             ("Train 9 models + GridSearchCV; log to MLflow", ORANGE),
+             ("Train 8 models + GridSearchCV; log to MLflow", ORANGE),
              ("Select lowest validation RMSE; refit on train+val", ORANGE),
              ("Beats persistence baseline on test?", GREEN),
              ("Register model, deploy Flask API + web app", ORANGE),

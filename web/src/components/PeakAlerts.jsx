@@ -15,7 +15,7 @@ export default function PeakAlerts({ D }) {
       texttemplate: "%{text}", textfont: { size: 16, color: "#14181f" },
     }],
     roc: [
-      { x: C.roc.fpr, y: C.roc.tpr, name: `Tuned tree, AUC ${T.roc_auc.toFixed(3)}`, line: { color: COLORS.orange, width: 2.5 } },
+      { x: C.roc.fpr, y: C.roc.tpr, name: `Selected model, AUC ${T.roc_auc.toFixed(3)}`, line: { color: COLORS.orange, width: 2.5 } },
       { x: [0, 1], y: [0, 1], name: "Random guess", line: { color: COLORS.grey, dash: "dash" } },
     ],
   }), [D]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -23,7 +23,7 @@ export default function PeakAlerts({ D }) {
   const kpis = [["Accuracy", T.accuracy], ["Precision", T.precision], ["Recall", T.recall], ["F1-score", T.f1], ["ROC-AUC", T.roc_auc]];
   return (
     <Section id="peaks" title="Peak-hour alerts (classification)"
-      sub={`A second model flags hours above ${C.threshold_kw.toFixed(2)} kW (the busiest 25% of training hours). A decision tree tuned with GridSearchCV beat its default version and logistic regression on validation F1; these are its scores on the held-out test period.`}>
+      sub={`A second model flags hours above ${C.threshold_kw.toFixed(2)} kW (the busiest 25% of training hours). A default decision tree, a GridSearchCV-tuned decision tree and a random forest were compared on validation F1; these are the scores of the selected one (${C.selected.replace(/_/g, " ")}) on the held-out test period.`}>
       <div className="kpis inline">
         {kpis.map(([l, v]) => (
           <div className="kpi" key={l}><div className="label">{l}</div><div className="value">{(v * 100).toFixed(1)}%</div></div>
@@ -43,9 +43,8 @@ export default function PeakAlerts({ D }) {
       </div>
       <p className="note">High recall, moderate precision: the alert catches {(T.recall * 100).toFixed(0)}% of real peak hours at the cost
         of some false alarms, the safer trade-off when the goal is to avoid unexpected peaks. For comparison, flagging hours where the
-        regression forecast exceeds the threshold is more accurate ({(C.forecast_threshold_rule_test.accuracy * 100).toFixed(1)}%) but catches only{" "}
-        {(C.forecast_threshold_rule_test.recall * 100).toFixed(0)}% of peaks. The live forecast uses the classifier for the next hour and that rule for
-        later hours, where the classifier's inputs are no longer up to date.</p>
+        regression forecast exceeds the threshold catches only{" "}
+        {(C.forecast_threshold_rule_test.recall * 100).toFixed(0)}% of peaks. The live forecast uses this classifier for every forecast hour.</p>
     </Section>
   );
 }

@@ -5,3 +5,4 @@ voltcast-forecaster  version  3  status READY  run 9d8c316ea235  model=hist_grad
 voltcast-forecaster  version  4  status READY  run 0ae439f197d4  model=hist_gradient_boosting  test_mae=0.2934  test_r2=0.6227
 voltcast-forecaster  version  5  status READY  run 0a2fc2d6f2fc  model=random_forest  test_mae=0.2947  test_r2=0.6199
 voltcast-forecaster  version  6  status READY  run 8246d832650d  model=random_forest  test_mae=0.2947  test_r2=0.6199
+voltcast-forecaster  version  7  status READY  run 874ef8e4ed56  model=random_forest  test_mae=0.2947  test_r2=0.6199

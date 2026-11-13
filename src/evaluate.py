@@ -26,7 +26,7 @@ LABELS = {
     "persistence_baseline": "Persistence baseline", "seasonal_naive_24h": "Seasonal naive (24 h)",
     "linear_regression": "Linear regression", "ridge_regression": "Ridge regression",
     "decision_tree": "Decision tree", "knn": "K-nearest neighbours", "svm": "SVM (SVR)",
-    "random_forest": "Random forest", "hist_gradient_boosting": "Gradient boosting",
+    "random_forest": "Random forest",
 }
 
 
